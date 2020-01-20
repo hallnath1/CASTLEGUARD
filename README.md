@@ -1,2 +1,1 @@
-# cs347_project
-CASTLE: Continuously Anonymizing Data Streams Implementation
+# CASTLE: Continuously Anonymizing Data Streams Implementation
