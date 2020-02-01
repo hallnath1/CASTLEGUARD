@@ -27,7 +27,6 @@ class Range():
         self.lower = lower
         self.upper = upper
 
-
     def VInfoLoss(self, I):
         """Calculates VinfoLoss of I defined on page 4 of castle paper.
 
