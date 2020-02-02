@@ -2,7 +2,7 @@ class Range():
 
     """Stores the lower and upper values for a cluster on a single axis. """
 
-    def __init__(self, lower=0, upper=0):
+    def __init__(self, lower=None, upper=None):
         """Initialises the Range with given lower and upper values, or 0s if not provided
 
         Kwargs:
@@ -26,8 +26,8 @@ class Range():
         Returns: TODO
 
         """
-        self.lower = min(self.lower, value)
-        self.upper = max(self.upper, value)
+        self.lower = min(self.lower, value) if self.lower else value
+        self.upper = max(self.upper, value) if self.upper else value
 
     def VInfoLoss(self, I):
         """Calculates VinfoLoss of I defined on page 4 of castle paper.
