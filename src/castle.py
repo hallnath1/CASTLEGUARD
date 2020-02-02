@@ -29,7 +29,7 @@ class CASTLE():
         # Maximum number of clusters that can be active
         self.beta: int = beta
         # Maximum amount of information loss, currently set to max
-        self.tau: float = math.inf
+        self.tau: float = -math.inf
 
         # Set of non-ks anonymised clusters
         self.big_gamma: List[Cluster] = []
@@ -57,6 +57,7 @@ class CASTLE():
             cluster = Cluster(self.headers)
             self.big_gamma.append(cluster)
 
+        print("INSERTING {}".format(data))
         cluster.insert(data)
 
         # Let t' be the tuple with position equal to t.p - delta
@@ -115,12 +116,12 @@ class CASTLE():
         if not setCok:
             if self.beta <= len(self.big_gamma):
                 # TODO: Return any cluster in setCmin with minimal size #
-                pass
+                return random.choice(tuple(setCmin))
             else:
                 return None
         else:
             # TODO: Return any cluster in setCok with minimal size #
-            pass
+            return random.choice(tuple(setCok))
 
         return None
 

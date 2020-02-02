@@ -1,3 +1,4 @@
+import copy
 import pandas as pd
 
 from range import Range
@@ -53,14 +54,15 @@ class Cluster():
 
         """
         # TODO: can be optimised by looping through ranges and calculating infoLoss on ranges that would be updated
-        ranges_copy = self.ranges.copy()
+        # TODO: NEEDS TO BE OPTIMISED, 80% of the program time is spent here #
+        ranges_copy = copy.deepcopy(self.ranges)
         self.insert(t)
         loss = self.information_loss(global_ranges)
 
         # Get the length of the frame
         length = len(self.contents.index)
         # Remove the last element (the last one we entered)
-        self.contents.drop(length - 1)
+        self.contents = self.contents.drop(length - 1)
 
         self.ranges = ranges_copy
 
@@ -84,3 +86,9 @@ class Cluster():
 
     def __contains__(self, item):
         return item in self.contents
+
+    def __str__(self):
+        return "Tuples: {}, Ranges: {}".format(
+            self.contents.to_string(),
+            str(self.ranges)
+        )
