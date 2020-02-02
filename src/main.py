@@ -14,6 +14,7 @@ def main():
     stream = CASTLE(handler, headers, 5, 10, 5)
 
     for (_, row) in frame.iterrows():
+        print("INSERTING: {}".format(row))
         stream.insert(row)
         time.sleep(0.5)
 

@@ -1,4 +1,4 @@
-import random
+import math, random
 
 from typing import Any, Callable, Deque, Tuple
 from collections import deque
@@ -28,6 +28,8 @@ class CASTLE():
         self.delta: int = delta
         # Maximum number of clusters that can be active
         self.beta: int = beta
+        # Maximum amount of information loss, currently set to max
+        self.tau: float = math.inf
 
         # Set of non-ks anonymised clusters
         self.big_gamma: List[Cluster] = []
@@ -52,7 +54,7 @@ class CASTLE():
 
         if not cluster:
             # Create a new cluster
-            cluster = Cluster()
+            cluster = Cluster(self.headers)
             self.big_gamma.append(cluster)
 
         cluster.insert(data)
@@ -93,21 +95,22 @@ class CASTLE():
         e = set()
 
         for cluster in self.big_gamma:
-            e.update(cluster.enlargement(t, self.global_ranges))
+            e.add(cluster.enlargement(t, self.global_ranges))
 
         # If e is empty, we should return None so a new cluster gets made
         if not e:
             return None
 
         minima = min(e)
-        setCmin = [cluster for cluster in self.big_gamma if cluster.enlargement(t) == minima]
+        setCmin = [cluster for cluster in self.big_gamma if
+                   cluster.enlargement(t, self.global_ranges) == minima]
 
         setCok = set()
 
         for cluster in setCmin:
-            ilcj = cluster.information_loss(t)
+            ilcj = cluster.information_loss_given(t, self.global_ranges)
             if ilcj <= self.tau:
-                setCok.insert(cluster)
+                setCok.add(cluster)
 
         if not setCok:
             if self.beta <= len(self.big_gamma):
@@ -199,7 +202,7 @@ class CASTLE():
             t = bucket.pop(random.randint(0, len(bucket) - 1))
 
             # Create a new subcluster over t
-            cnew = Cluster()
+            cnew = Cluster(self.headers)
             cnew.insert(t)
 
             # Check whether the bucket is empty
