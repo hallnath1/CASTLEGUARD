@@ -169,6 +169,7 @@ class CASTLE():
 
         self.output_cluster(mc)
 
+    # TODO: Check this function is correct #
     def split(self, c):
         """Splits a cluster <c>
 
@@ -205,13 +206,69 @@ class CASTLE():
             if not buckets[pid]:
                 del buckets[pid]
 
+            heap = []
+
+            for key, value in buckets:
+                if key == pid:
+                    continue
+
+                # Pick a random tuple in the bucket
+                random_tuple = random.choice(value)
+
+                # Insert the tuple to the heap
+                heap.append(random_tuple)
+
+            # Sort the heap by distance to our original tuple
+            distance_func = lambda t2: self.tuple_distance(t, t2)
+            heap.sort(key=distance_func)
+
+            for node in heap:
+                cnew.insert(node)
+
+                # Scour the node from the Earth
+                containing = [key for key in buckets.keys() if node in buckets[key]]
+
+                for key in containing:
+                    buckets[key].remove(node)
+
+                    if not buckets[key]:
+                        del buckets[key]
+
+
+            sc.append(cnew)
+
         for bi in buckets.values():
             ti = random.choice(bi)
 
             # Find the nearest cluster in sc
-            nearest = min(sc, key=lambda c: c.enlargement(ti))
+            nearest = min(sc, key=lambda c: c.enlargement(ti, self.global_ranges))
 
             for t in bi:
                 nearest.insert(t)
 
         return sc
+
+    # TODO: This is a bad way of calculating distance as it is heavily biased
+    # on certain attributes
+    #
+    # For example, given the original tuple of A = (1, 100) and tuples B = (2,
+    # 110) and C = (3, 105), it will find that B is further from A than C is.
+    # This might be the desired behaviour however, as if the range of
+    # attributes is [1, 3] and [0, 1000], we might want C to be further as it
+    # is further along its global range.
+    def tuple_distance(self, t1, t2):
+        """Calculates the distance between the two tuples
+
+        Args:
+            t1 (TODO): TODO
+            t2 (TODO): TODO
+
+        Returns: TODO
+
+        """
+        distance = 0
+
+        for header in self.headers:
+            distance += abs(t1[header] - t2[header])
+
+        return distance
