@@ -67,7 +67,7 @@ class CASTLE():
         for t in cluster:
             self.callback(t)
 
-    def best_selection(self, element):
+    def best_selection(self, t):
         """Finds the best matching cluster for <element>
 
         Args:
@@ -76,10 +76,14 @@ class CASTLE():
         Returns: TODO
 
         """
-        e = {}
+        e = set()
 
         for cluster in self.big_gamma:
-            e.insert(cluster.enlargement(t))
+            e.update(cluster.enlargement(t))
+
+        # If e is empty, we should return None so a new cluster gets made
+        if not e:
+            return None
 
         minima = min(e)
         setCmin = [cluster for cluster in self.big_gamma if cluster.enlargement(t) == minima]
@@ -186,3 +190,14 @@ class CASTLE():
             # Check whether the bucket is empty
             if not buckets[pid]:
                 del buckets[pid]
+
+        for bi in buckets.values():
+            ti = random.choice(bi)
+
+            # Find the nearest cluster in sc
+            nearest = min(sc, key=lambda c: c.enlargement(ti))
+
+            for t in bi:
+                nearest.insert(t)
+
+        return sc
