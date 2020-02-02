@@ -20,7 +20,7 @@ class CASTLE():
         self.callback: Callable = callback
 
         self.deque: Deque = deque()
-        self.headers: Tuple[str] = headers
+        self.headers: Tuple[str] = headers[1:]
 
         # Required number of tuples for a cluster to be complete
         self.k: int = k
