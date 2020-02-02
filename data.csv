@@ -1,4 +1,4 @@
-CustomerID,PickupLocationID,TripDistance
+pid,PickupLocationID,TripDistance
 1,264,.00
 2,97,.86
 3,49,.66
