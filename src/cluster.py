@@ -1,11 +1,18 @@
+import pandas as pd
+
+from range import Range
+
 class Cluster():
 
     """Stores tuples that are considered by the algorithm to be together. """
 
-    def __init__(self):
+    def __init__(self, headers):
         """Initialises the cluster """
-        self.contents = []
+        self.contents = pd.DataFrame(columns=headers)
         self.ranges = {}
+
+        for header in headers:
+            self.ranges[header] = Range()
 
     def insert(self, element):
         """Inserts a tuple into the cluster
@@ -16,8 +23,11 @@ class Cluster():
         Returns: TODO
 
         """
-        self.contents.append(element)
+        self.contents = self.contents.append(element, ignore_index=True)
         # TODO: update ranges using element headers
+
+        for k, v in self.ranges.items():
+            v.update(element[k])
 
     def enlargement(self, t, global_ranges):
         """Calculates the enlargement value for adding <t> into this cluster
@@ -43,11 +53,15 @@ class Cluster():
 
         """
         # TODO: can be optimised by looping through ranges and calculating infoLoss on ranges that would be updated
-
         ranges_copy = self.ranges.copy()
         self.insert(t)
         loss = self.information_loss(global_ranges)
-        self.contents.remove(t)
+
+        # Get the length of the frame
+        length = len(self.contents.index)
+        # Remove the last element (the last one we entered)
+        self.contents.drop(length - 1)
+
         self.ranges = ranges_copy
 
         return loss
@@ -59,7 +73,7 @@ class Cluster():
 
         """
         loss = 0
-        for k, r in ranges.items():
+        for k, r in self.ranges.items():
             global_range = global_ranges[k]
             loss += r / global_range
 
