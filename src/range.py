@@ -2,7 +2,7 @@ class Range():
 
     """Stores the lower and upper values for a cluster on a single axis. """
 
-    def __init__(self, lower, upper):
+    def __init__(self, lower, upper, attribute):
         """Initialises the Range with given lower and upper values
 
         Args:
@@ -24,7 +24,9 @@ class Range():
         Returns: TODO
 
         """
-        pass
+        self.lower = lower
+        self.upper = upper
+
 
     def VInfoLoss(self, I):
         """Calculates VinfoLoss of I defined on page 4 of castle paper.
@@ -37,3 +39,6 @@ class Range():
         """
 
         return (self.upper - self.lower) / (I.upper - I.lower)
+
+    def __div__(self, I):
+        return VInfoLoss(I)
