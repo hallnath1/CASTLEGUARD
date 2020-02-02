@@ -15,7 +15,7 @@ def create_rectangle(rx, ry):
     return patches.Rectangle((rx.lower, ry.lower), width, height, fill=False)
 
 def main():
-    frame = pd.read_csv("data.csv").sample(10)
+    frame = pd.read_csv("data.csv").sample(20)
 
     headers = list(frame.columns.values)
     stream = CASTLE(handler, headers, 5, 10, 5)
