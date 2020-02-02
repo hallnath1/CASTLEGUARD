@@ -43,3 +43,6 @@ class Range():
 
     def __truediv__(self, I):
         return self.VInfoLoss(I)
+
+    def __str__(self):
+        return "Range [{}, {}]".format(self.lower, self.upper)
