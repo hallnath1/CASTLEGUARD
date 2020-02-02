@@ -4,6 +4,7 @@ from typing import Any, Callable, Deque, Tuple
 from collections import deque
 
 from cluster import Cluster
+from range import Range
 
 class CASTLE():
 
@@ -33,7 +34,20 @@ class CASTLE():
         # Set of ks anonymised clusters
         self.big_omega: List[Cluster] = []
 
+        # Global ranges for the data stream S
+        self.global_ranges: Dict[str, Range] = {}
+        # Initialise them as empty ranges
+        for header in self.headers:
+            self.global_ranges[header] = Range()
+
+    def update_global_ranges(self, data: Any):
+        for header in self.headers:
+            self.global_ranges[header].update(data[header])
+
     def insert(self, data: Any):
+        # Update the global range values
+        self.update_global_ranges(data)
+
         cluster = self.best_selection(data)
 
         if not cluster:
@@ -79,7 +93,7 @@ class CASTLE():
         e = set()
 
         for cluster in self.big_gamma:
-            e.update(cluster.enlargement(t))
+            e.update(cluster.enlargement(t, self.global_ranges))
 
         # If e is empty, we should return None so a new cluster gets made
         if not e:
