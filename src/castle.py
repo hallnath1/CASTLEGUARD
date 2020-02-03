@@ -57,7 +57,6 @@ class CASTLE():
             cluster = Cluster(self.headers)
             self.big_gamma.append(cluster)
 
-        print("INSERTING {}".format(data))
         cluster.insert(data)
 
         # Let t' be the tuple with position equal to t.p - delta
@@ -88,9 +87,10 @@ class CASTLE():
         """Finds the best matching cluster for <element>
 
         Args:
-            element (TODO): TODO
+            t (Series): The tuple to find the best cluster for
 
-        Returns: TODO
+        Returns: Either a cluster for t to be inserted into, or None if a new
+		cluster should be created
 
         """
         e = set()
@@ -178,11 +178,13 @@ class CASTLE():
         """Splits a cluster <c>
 
         Args:
-            c (TODO): TODO
+            c (Cluster): The cluster that needs to be split into smaller
+			clusters
 
-        Returns: TODO
+        Returns: List of new clusters with tuples inside them
 
         """
+        print("SPLITTING THE CLUSTER")
         sc = []
 
         # Group everyone by pid
@@ -264,8 +266,8 @@ class CASTLE():
         """Calculates the distance between the two tuples
 
         Args:
-            t1 (TODO): TODO
-            t2 (TODO): TODO
+            t1 (Series): The first tuple to consider
+            t2 (Series): The second tuple to consider
 
         Returns: TODO
 
