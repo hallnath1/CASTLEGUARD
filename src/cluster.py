@@ -53,18 +53,16 @@ class Cluster():
         Returns: TODO
 
         """
-        # TODO: can be optimised by looping through ranges and calculating infoLoss on ranges that would be updated
-        # TODO: NEEDS TO BE OPTIMISED, 80% of the program time is spent here #
-        ranges_copy = copy.deepcopy(self.ranges)
-        self.insert(t)
-        loss = self.information_loss(global_ranges)
+        loss = 0
 
-        # Get the length of the frame
-        length = len(self.contents.index)
-        # Remove the last element (the last one we entered)
-        self.contents = self.contents.drop(length - 1)
-
-        self.ranges = ranges_copy
+        # For each range, check if <t> would extend it
+        for k, r in self.ranges.items():
+            global_range = global_ranges[k]
+            updated = Range(
+                lower=min(r.lower, t[k]),
+                upper=max(r.upper, t[k])
+            )
+            loss += updated / global_range
 
         return loss
 
