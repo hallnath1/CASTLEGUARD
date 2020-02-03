@@ -33,7 +33,7 @@ def main():
 
         ax.add_patch(create_rectangle(plid_range, distance_range))
 
-        for (_, t) in cluster.contents.iterrows():
+        for t in cluster.contents:
             pickup_id = t["PickupLocationID"]
             distance = t["TripDistance"]
             print(pickup_id, distance)
