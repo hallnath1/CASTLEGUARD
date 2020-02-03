@@ -4,6 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
+import app
+
 from castle import CASTLE
 
 def handler(value):
@@ -14,20 +16,10 @@ def create_rectangle(rx, ry):
     height = ry.upper - ry.lower
     return patches.Rectangle((rx.lower, ry.lower), width, height, fill=False)
 
-def main():
-    frame = pd.read_csv("data.csv").sample(20)
-
-    headers = list(frame.columns.values)
-    stream = CASTLE(handler, headers, 5, 10, 5)
-
-    for (_, row) in frame.iterrows():
-        stream.insert(row)
-        # time.sleep(0.5)
-
+def display_visualisation(stream):
     fig, ax = plt.subplots(1)
 
     for cluster in stream.big_gamma:
-        print([str(r) for r in cluster.ranges.values()])
         plid_range = cluster.ranges["PickupLocationID"]
         distance_range = cluster.ranges["TripDistance"]
 
@@ -36,10 +28,23 @@ def main():
         for (_, t) in cluster.contents.iterrows():
             pickup_id = t["PickupLocationID"]
             distance = t["TripDistance"]
-            print(pickup_id, distance)
             plt.scatter(pickup_id, distance)
 
     plt.show()
+
+def main():
+    args = app.parse_args()
+
+    frame = pd.read_csv(args.filename).sample(20)
+
+    headers = list(frame.columns.values)
+    stream = CASTLE(handler, headers, args.k, args.delta, args.beta)
+
+    for (_, row) in frame.iterrows():
+        stream.insert(row)
+
+    if args.display:
+        display_visualisation(stream)
 
 if __name__ == "__main__":
     main()
