@@ -125,19 +125,16 @@ class CASTLE():
 
         return None
 
-    def delay_constraint(self, t):
+    def delay_constraint(self, t, c):
         """Decides whether to suppress <t> or not
 
         Args:
             t (TODO): TODO
+            c (TODO): TODO
 
         Returns: TODO
 
         """
-        # Find the cluster that c belongs to
-        for cluster in self.big_gamma:
-            if t in cluster:
-                c = cluster
 
         if k <= len(c):
             self.output_cluster(c)
