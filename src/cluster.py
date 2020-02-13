@@ -61,8 +61,8 @@ class Cluster():
         for k, r in self.ranges.items():
             global_range = global_ranges[k]
             updated = Range(
-                lower=min(r.lower, t[k]),
-                upper=max(r.upper, t[k])
+                lower=min(r.lower, t.data[k]),
+                upper=max(r.upper, t.data[k])
             )
             loss += updated / global_range
 
