@@ -116,7 +116,7 @@ class CASTLE():
         setCok = set()
 
         for cluster in setCmin:
-            ilcj = cluster.information_loss_given(t, self.global_ranges)
+            ilcj = cluster.information_loss_given_t(t, self.global_ranges)
             if ilcj <= self.tau:
                 setCok.add(cluster)
 
