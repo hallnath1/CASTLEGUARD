@@ -103,7 +103,7 @@ class CASTLE():
         e = set()
 
         for cluster in self.big_gamma:
-            e.add(cluster.enlargement(t, self.global_ranges))
+            e.add(cluster.tuple_enlargement(t, self.global_ranges))
 
         # If e is empty, we should return None so a new cluster gets made
         if not e:
@@ -111,7 +111,7 @@ class CASTLE():
 
         minima = min(e)
         setCmin = [cluster for cluster in self.big_gamma if
-                   cluster.enlargement(t, self.global_ranges) == minima]
+                   cluster.tuple_enlargement(t, self.global_ranges) == minima]
 
         setCok = set()
 
@@ -172,8 +172,7 @@ class CASTLE():
             # TODO: Suppress t somehow #
             return
 
-        diff = [cluster for cluster in self.big_gamma if cluster != c]
-        mc = self.merge_clusters(c, diff)
+        mc = self.merge_clusters(c)
 
         self.output_cluster(mc)
 
@@ -251,9 +250,31 @@ class CASTLE():
             ti = random.choice(bi)
 
             # Find the nearest cluster in sc
-            nearest = min(sc, key=lambda c: c.enlargement(ti, self.global_ranges))
+            nearest = min(sc, key=lambda c: c.tuple_enlargement(ti, self.global_ranges))
 
             for t in bi:
                 nearest.insert(t)
 
         return sc
+
+        def merge_clusters(self, c):
+            """Merges a cluster <c> with another cluster in big_gamma \ <c>
+
+            Args:
+                c (Cluster): The cluster that needs to be merged
+
+            Returns: void
+
+            """
+            gamma_c = [cluster for cluster in self.big_gamma if cluster != c]
+
+            while len(c) < self.k:
+                lowest_enlargement_cluster = min(gamma_c, key=lambda cl: temp.cluster_enlargement(cl, self.global_ranges))
+
+                for t in lowest_enlargement_cluster.contents:
+                    c.insert(t)
+
+                self.big_gamma.remove(lowest_enlargement_cluster)
+                gamma_c.remove(lowest_enlargement_cluster)
+
+            return c
