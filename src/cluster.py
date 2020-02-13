@@ -9,7 +9,7 @@ class Cluster():
 
     def __init__(self, headers):
         """Initialises the cluster """
-        self.contents = pd.DataFrame(columns=headers)
+        self.contents = []
         self.ranges = {}
 
         for header in headers:
@@ -24,7 +24,9 @@ class Cluster():
         Returns: TODO
 
         """
-        self.contents = self.contents.append(element, ignore_index=True)
+        self.contents.append(element)
+        element.parent = self
+
         # TODO: update ranges using element headers
 
         for k, v in self.ranges.items():
@@ -59,8 +61,8 @@ class Cluster():
         for k, r in self.ranges.items():
             global_range = global_ranges[k]
             updated = Range(
-                lower=min(r.lower, t[k]),
-                upper=max(r.upper, t[k])
+                lower=min(r.lower, t.data[k]),
+                upper=max(r.upper, t.data[k])
             )
             loss += updated / global_range
 
@@ -87,6 +89,6 @@ class Cluster():
 
     def __str__(self):
         return "Tuples: {}, Ranges: {}".format(
-            self.contents.to_string(),
+            str(self.contents),
             str(self.ranges)
         )

@@ -5,6 +5,7 @@ from collections import deque
 
 from cluster import Cluster
 from range import Range
+from item import Item
 
 class CASTLE():
 
@@ -42,22 +43,28 @@ class CASTLE():
         for header in self.headers:
             self.global_ranges[header] = Range()
 
+        # Deque of all tuple objects and parent cluster pairs
+        self.global_tuple: Deque = deque()
+
     def update_global_ranges(self, data: Any):
         for header in self.headers:
-            self.global_ranges[header].update(data[header])
+            self.global_ranges[header].update(data.data[header])
 
     def insert(self, data: Any):
         # Update the global range values
-        self.update_global_ranges(data)
+        item = Item(data=data, headers=self.headers)
+        self.update_global_ranges(item)
 
-        cluster = self.best_selection(data)
+        cluster = self.best_selection(item)
 
         if not cluster:
             # Create a new cluster
             cluster = Cluster(self.headers)
             self.big_gamma.append(cluster)
 
-        cluster.insert(data)
+        print("INSERTING {}".format(item.data))
+        cluster.insert(item)
+        self.global_tuple.append(item)
 
         # Let t' be the tuple with position equal to t.p - delta
         # if t' has not yet been output then
@@ -189,10 +196,10 @@ class CASTLE():
 
         # Insert all the tuples into the relevant buckets
         for t in c:
-            if t.pid not in buckets:
-                buckets[t.pid] = []
+            if t.data.pid not in buckets:
+                buckets[t.data.pid] = []
 
-            buckets[t.pid].insert(t)
+            buckets[t.data.pid].insert(t)
 
         # While k <= number of buckets
         while k <= len(buckets):
@@ -222,7 +229,7 @@ class CASTLE():
                 heap.append(random_tuple)
 
             # Sort the heap by distance to our original tuple
-            distance_func = lambda t2: self.tuple_distance(t, t2)
+            distance_func = lambda t2: t.tuple_distance(t2)
             heap.sort(key=distance_func)
 
             for node in heap:
@@ -250,28 +257,3 @@ class CASTLE():
                 nearest.insert(t)
 
         return sc
-
-    # TODO: This is a bad way of calculating distance as it is heavily biased
-    # on certain attributes
-    #
-    # For example, given the original tuple of A = (1, 100) and tuples B = (2,
-    # 110) and C = (3, 105), it will find that B is further from A than C is.
-    # This might be the desired behaviour however, as if the range of
-    # attributes is [1, 3] and [0, 1000], we might want C to be further as it
-    # is further along its global range.
-    def tuple_distance(self, t1, t2):
-        """Calculates the distance between the two tuples
-
-        Args:
-            t1 (Series): The first tuple to consider
-            t2 (Series): The second tuple to consider
-
-        Returns: TODO
-
-        """
-        distance = 0
-
-        for header in self.headers:
-            distance += abs(t1[header] - t2[header])
-
-        return distance
