@@ -48,7 +48,7 @@ class CASTLE():
 
     def update_global_ranges(self, data: Any):
         for header in self.headers:
-            self.global_ranges[header].update(item.data[header])
+            self.global_ranges[header].update(data.data[header])
 
     def insert(self, data: Any):
         # Update the global range values
@@ -64,7 +64,7 @@ class CASTLE():
 
         print("INSERTING {}".format(item.data))
         cluster.insert(item)
-        global_tuple.append(item)
+        self.global_tuple.append(item)
 
         # Let t' be the tuple with position equal to t.p - delta
         # if t' has not yet been output then
