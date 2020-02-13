@@ -44,7 +44,7 @@ class Cluster():
         # TODO: Actually make this generalise tuples #
         return t
 
-    def enlargement(self, t, global_ranges):
+    def tuple_enlargement(self, t, global_ranges):
         """Calculates the enlargement value for adding <t> into this cluster
 
         Args:
@@ -54,11 +54,25 @@ class Cluster():
 
         """
 
-        info_loss = self.information_loss_given(t, global_ranges) - self.information_loss(global_ranges)
+        info_loss = self.information_loss_given_t(t, global_ranges) - self.information_loss(global_ranges)
 
         return info_loss / len(self.ranges)
 
-    def information_loss_given(self, t, global_ranges):
+    def cluster_enlargement(self, c, global_ranges):
+        """Calculates the enlargement value for merging <c> into this cluster
+
+        Args:
+            c (TODO): TODO
+
+        Returns: TODO
+
+        """
+
+        info_loss = self.information_loss_given_c(c, global_ranges) - self.information_loss(global_ranges)
+
+        return info_loss / len(self.ranges)
+
+    def information_loss_given_t(self, t, global_ranges):
         """Calculates the information loss upon adding <t> into this cluster
 
         Args:
@@ -75,6 +89,28 @@ class Cluster():
             updated = Range(
                 lower=min(r.lower, t.data[k]),
                 upper=max(r.upper, t.data[k])
+            )
+            loss += updated / global_range
+
+        return loss
+
+    def information_loss_given_c(self, c, global_ranges):
+        """Calculates the information loss upon merging <c> into this cluster
+
+        Args:
+            c (TODO): TODO
+
+        Returns: TODO
+
+        """
+        loss = 0
+
+        # For each range, check if <t> would extend it
+        for k, r in self.ranges.items():
+            global_range = global_ranges[k]
+            updated = Range(
+                lower=min(r.lower, c.ranges[k].lower),
+                upper=max(r.upper, c.ranges[k].upper)
             )
             loss += updated / global_range
 
