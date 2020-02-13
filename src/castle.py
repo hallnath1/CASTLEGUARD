@@ -62,9 +62,15 @@ class CASTLE():
             cluster = Cluster(self.headers)
             self.big_gamma.append(cluster)
 
-        print("INSERTING {}".format(item.data))
         cluster.insert(item)
         self.global_tuple.append(item)
+
+        # If we now have too many tuples, try and output one
+        if len(self.global_tuple) > self.delta:
+            # Get the next tuple to be output
+            t_prime = self.global_tuple.popleft()
+            print("Attempting to output: {}".format(t_prime))
+            self.delay_constraint(t_prime)
 
         # Let t' be the tuple with position equal to t.p - delta
         # if t' has not yet been output then
@@ -76,18 +82,19 @@ class CASTLE():
         self.callback(element)
 
     def output_cluster(self, c):
-        sc = c if len(c) < 2 * self.k else self.split(c)
+        sc = [c] if len(c) < 2 * self.k else self.split(c)
 
         for cluster in sc:
-            for t in cluster:
+            for t in cluster.contents:
                 generalised = cluster.generalise(t)
                 self.callback(generalised)
 
             # TODO: Update self.tau according to infoLoss(cluster) #
             # TODO: Decide whether to delete cluster or move to self.big_omega #
-            self.big_gamma.remove(cluster)
+            # TODO: This should probably happen #
+            # self.big_gamma.remove(cluster)
 
-        for t in cluster:
+        for t in cluster.contents:
             self.callback(t)
 
     def best_selection(self, t):
@@ -132,26 +139,25 @@ class CASTLE():
 
         return None
 
-    def delay_constraint(self, t, c):
+    def delay_constraint(self, t):
         """Decides whether to suppress <t> or not
 
         Args:
             t (TODO): TODO
-            c (TODO): TODO
 
         Returns: TODO
 
         """
 
-        if k <= len(c):
-            self.output_cluster(c)
+        if self.k <= len(t.parent):
+            self.output_cluster(t.parent)
             return
 
         # Get all the clusters that contain t
         # TODO: This most likely needs to be 'contains', eg within bounds #
         KCset = [cluster for cluster in self.big_omega if t in cluster]
 
-        if KCSet:
+        if KCset:
             generalised = cluster.generalise(t)
             self.callback(generalised)
             return
@@ -159,21 +165,21 @@ class CASTLE():
         m = 0
 
         for cluster in self.big_gamma:
-            if len(c) < len(cluster):
+            if len(t.parent) < len(cluster):
                 m += 1
 
         if m > len(self.big_gamma) / 2:
             # TODO: Suppress t somehow #
             return
 
-        total_cluster_size = [len(cluster) for cluster in self.big_gamma].sum()
+        total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
 
         if total_cluster_size < self.k:
             # TODO: Suppress t somehow #
             return
 
-        diff = [cluster for cluster in self.big_gamma if cluster != c]
-        mc = self.merge_clusters(c, diff)
+        diff = [cluster for cluster in self.big_gamma if cluster != t.parent]
+        mc = t.parent # self.merge_clusters(t.parent, diff)
 
         self.output_cluster(mc)
 
@@ -195,14 +201,14 @@ class CASTLE():
         buckets = {}
 
         # Insert all the tuples into the relevant buckets
-        for t in c:
+        for t in c.contents:
             if t.data.pid not in buckets:
                 buckets[t.data.pid] = []
 
-            buckets[t.data.pid].insert(t)
+            buckets[t.data.pid].append(t)
 
         # While k <= number of buckets
-        while k <= len(buckets):
+        while self.k <= len(buckets):
             # Pick a random tuple from a random bucket
             pid = random.choice(list(buckets.keys()))
             bucket = buckets[pid]
@@ -218,7 +224,7 @@ class CASTLE():
 
             heap = []
 
-            for key, value in buckets:
+            for key, value in buckets.items():
                 if key == pid:
                     continue
 
