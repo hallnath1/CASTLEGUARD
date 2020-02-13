@@ -32,6 +32,18 @@ class Cluster():
         for k, v in self.ranges.items():
             v.update(element[k])
 
+    def generalise(self, t):
+        """Generalises a tuple based on the ranges for this cluster
+
+        Args:
+            t (TODO): TODO
+
+        Returns: TODO
+
+        """
+        # TODO: Actually make this generalise tuples #
+        return t
+
     def tuple_enlargement(self, t, global_ranges):
         """Calculates the enlargement value for adding <t> into this cluster
 

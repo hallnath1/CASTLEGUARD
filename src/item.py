@@ -8,7 +8,7 @@ class Item:
         return self.data[key]
 
     def __str__(self):
-        return data.to_string()
+        return self.data.to_string()
 
     # TODO: This is a bad way of calculating distance as it is heavily biased
     # on certain attributes
