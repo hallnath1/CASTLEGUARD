@@ -42,7 +42,12 @@ class Cluster():
 
         """
         # TODO: Actually make this generalise tuples #
-        return t
+        generalised = {}
+        for h, v in self.ranges.items():
+            generalised['min' + h] = v.lower
+            generalised['max' + h] = v.upper
+
+        return pd.Series(data=generalised)
 
     def tuple_enlargement(self, t, global_ranges):
         """Calculates the enlargement value for adding <t> into this cluster
