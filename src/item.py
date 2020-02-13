@@ -1,3 +1,5 @@
+import math
+
 class Item:
 
     def __init__(self, data, headers):
@@ -32,7 +34,5 @@ class Item:
         s = self.data[self.headers]
         t = t.data[self.headers]
         error = s.sub(t).abs()
-        mean_squared_error = error.pow(2).mean(axis=1)
-        print(mean_squared_error)
-
-        return mean_squared_error.pow(0.5).iloc[0]
+        mean_squared_error = error.pow(2).mean(axis=0)
+        return math.sqrt(mean_squared_error)

@@ -178,7 +178,7 @@ class CASTLE():
             # TODO: Suppress t somehow #
             return
 
-        mc = self.merge_clusters(c)
+        mc = self.merge_clusters(t.parent)
 
         self.output_cluster(mc)
 
@@ -263,24 +263,24 @@ class CASTLE():
 
         return sc
 
-        def merge_clusters(self, c):
-            """Merges a cluster <c> with another cluster in big_gamma \ <c>
+    def merge_clusters(self, c):
+        """Merges a cluster <c> with another cluster in big_gamma \ <c>
 
-            Args:
-                c (Cluster): The cluster that needs to be merged
+        Args:
+            c (Cluster): The cluster that needs to be merged
 
-            Returns: void
+        Returns: void
 
-            """
-            gamma_c = [cluster for cluster in self.big_gamma if cluster != c]
+        """
+        gamma_c = [cluster for cluster in self.big_gamma if cluster != c]
 
-            while len(c) < self.k:
-                lowest_enlargement_cluster = min(gamma_c, key=lambda cl: temp.cluster_enlargement(cl, self.global_ranges))
+        while len(c) < self.k:
+            lowest_enlargement_cluster = min(gamma_c, key=lambda cl: c.cluster_enlargement(cl, self.global_ranges))
 
-                for t in lowest_enlargement_cluster.contents:
-                    c.insert(t)
+            for t in lowest_enlargement_cluster.contents:
+                c.insert(t)
 
-                self.big_gamma.remove(lowest_enlargement_cluster)
-                gamma_c.remove(lowest_enlargement_cluster)
+            self.big_gamma.remove(lowest_enlargement_cluster)
+            gamma_c.remove(lowest_enlargement_cluster)
 
-            return c
+        return c
