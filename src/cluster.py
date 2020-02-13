@@ -32,7 +32,7 @@ class Cluster():
         for k, v in self.ranges.items():
             v.update(element[k])
 
-    def enlargement(self, t, global_ranges):
+    def tuple_enlargement(self, t, global_ranges):
         """Calculates the enlargement value for adding <t> into this cluster
 
         Args:
