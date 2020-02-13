@@ -29,9 +29,10 @@ class Item:
         Returns: TODO
 
         """
-        distance = 0
+        s = self.data[self.headers]
+        t = t.data[self.headers]
+        error = s.sub(t).abs()
+        mean_squared_error = error.pow(2).mean(axis=1)
+        print(mean_squared_error)
 
-        for header in self.headers:
-            distance += abs(self.data[header] - t.data[header])
-
-        return distance
+        return mean_squared_error.pow(0.5).iloc[0]
