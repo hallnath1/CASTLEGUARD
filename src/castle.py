@@ -5,6 +5,7 @@ from collections import deque
 
 from cluster import Cluster
 from range import Range
+from item import Item
 
 class CASTLE():
 
@@ -47,21 +48,23 @@ class CASTLE():
 
     def update_global_ranges(self, data: Any):
         for header in self.headers:
-            self.global_ranges[header].update(data[header])
+            self.global_ranges[header].update(item.data[header])
 
     def insert(self, data: Any):
         # Update the global range values
-        self.update_global_ranges(data)
+        item = Item(data=data, headers=self.headers)
+        self.update_global_ranges(item)
 
-        cluster = self.best_selection(data)
+        cluster = self.best_selection(item)
 
         if not cluster:
             # Create a new cluster
             cluster = Cluster(self.headers)
             self.big_gamma.append(cluster)
 
-        print("INSERTING {}".format(data))
-        cluster.insert(data)
+        print("INSERTING {}".format(item.data))
+        cluster.insert(item)
+        global_tuple.append(item)
 
         # Let t' be the tuple with position equal to t.p - delta
         # if t' has not yet been output then
@@ -190,10 +193,10 @@ class CASTLE():
 
         # Insert all the tuples into the relevant buckets
         for t in c:
-            if t.pid not in buckets:
-                buckets[t.pid] = []
+            if t.data.pid not in buckets:
+                buckets[t.data.pid] = []
 
-            buckets[t.pid].insert(t)
+            buckets[t.data.pid].insert(t)
 
         # While k <= number of buckets
         while k <= len(buckets):

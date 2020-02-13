@@ -1,8 +1,7 @@
 class Item:
 
-    def __init__(self, data, parent, headers):
+    def __init__(self, data, headers):
         self.data = data
-        self.parent = parent
         self.headers = headers
 
     def __getitem__(self, key):
