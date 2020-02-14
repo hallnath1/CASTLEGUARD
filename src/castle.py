@@ -28,7 +28,7 @@ class CASTLE():
         self.callback: Callable[[pd.Series], None] = callback
 
         self.deque: Deque = deque()
-        self.headers: List[str] = headers[1:]
+        self.headers: List[str] = headers
 
         # Required number of tuples for a cluster to be complete
         self.k: int = k
