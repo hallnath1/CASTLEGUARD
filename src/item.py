@@ -36,6 +36,9 @@ class Item:
         """
         return self.data.to_string()
 
+    def __eq__(self, i):
+        return self.headers == i.headers and self.data.equals(i.data)
+
     def tuple_distance(self, t: Item) -> float:
         """Calculates the distance between the two tuples
 
