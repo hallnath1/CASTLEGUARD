@@ -1,6 +1,8 @@
 import math, random
 
-from typing import Any, Callable, Deque, Tuple
+import pandas as pd
+
+from typing import Any, Callable, Deque, Dict, List, Optional
 from collections import deque
 
 from cluster import Cluster
@@ -9,19 +11,24 @@ from item import Item
 
 class CASTLE():
 
-    """Docstring for CASTLE. """
+    """An implementation of the CASTLE Algorithm designed by Jianneng Cao,
+    Barbara Carminati, Elena Ferrari and Kian-Lee Tan."""
 
-    def __init__(self, callback: Callable, headers: Tuple[str], k, delta, beta):
-        """TODO: to be defined.
+    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], k: int, delta: int, beta: int):
+        """Initialises the CASTLE algorithm with necessary parameters.
 
         Args:
-            callback (TODO): TODO
+            callback: The function to call when a tuple is ejected
+            headers: The columns that need to be anonymised according to the
+            algorithm
+            k: The level of anonymity to provide
+            delta: The maximum number of active tuples at a time
+            beta: The maximum number of active clusters at a time
         """
-
-        self.callback: Callable = callback
+        self.callback: Callable[[pd.Series], None] = callback
 
         self.deque: Deque = deque()
-        self.headers: Tuple[str] = headers[1:]
+        self.headers: List[str] = headers[1:]
 
         # Required number of tuples for a cluster to be complete
         self.k: int = k
@@ -46,11 +53,25 @@ class CASTLE():
         # Deque of all tuple objects and parent cluster pairs
         self.global_tuple: Deque = deque()
 
-    def update_global_ranges(self, data: Any):
+    def update_global_ranges(self, data: Item):
+        """Updates the globally known ranges for each column based on the value
+        that this Item contains
+
+        Args:
+            data: The new element of data that has just been inserted into the
+            algorithm
+
+        """
         for header in self.headers:
             self.global_ranges[header].update(data.data[header])
 
-    def insert(self, data: Any):
+    def insert(self, data: pd.Series):
+        """Inserts a new piece of data into the algorithm and its state
+
+        Args:
+            data: The element of data to insert into the algorithm
+
+        """
         # Update the global range values
         item = Item(data=data, headers=self.headers)
         self.update_global_ranges(item)
@@ -76,12 +97,13 @@ class CASTLE():
         # if t' has not yet been output then
             # delay_constraint(t')
 
-    def output(self):
-        element = self.deque.popleft()
-        print("OUTPUTTING: {}".format(element))
-        self.callback(element)
+    def output_cluster(self, c: Cluster):
+        """Outputs a cluster according to the algorithm
 
-    def output_cluster(self, c):
+        Args:
+            c: The cluster to output with generalisations
+
+        """
         sc = [c] if len(c) < 2 * self.k else self.split(c)
 
         for cluster in sc:
@@ -97,14 +119,14 @@ class CASTLE():
         for t in cluster.contents:
             self.callback(t)
 
-    def best_selection(self, t):
+    def best_selection(self, t: Item) -> Optional[Cluster]:
         """Finds the best matching cluster for <element>
 
         Args:
-            t (Series): The tuple to find the best cluster for
+            t: The tuple to find the best cluster for
 
         Returns: Either a cluster for t to be inserted into, or None if a new
-		cluster should be created
+        cluster should be created
 
         """
         e = set()
@@ -129,26 +151,21 @@ class CASTLE():
 
         if not setCok:
             if self.beta <= len(self.big_gamma):
-                # TODO: Return any cluster in setCmin with minimal size #
                 return random.choice(tuple(setCmin))
             else:
                 return None
         else:
-            # TODO: Return any cluster in setCok with minimal size #
             return random.choice(tuple(setCok))
 
         return None
 
-    def delay_constraint(self, t):
+    def delay_constraint(self, t: Item):
         """Decides whether to suppress <t> or not
 
         Args:
-            t (TODO): TODO
-
-        Returns: TODO
+            t: The tuple to make decisions based on
 
         """
-
         if self.k <= len(t.parent):
             self.output_cluster(t.parent)
             return
@@ -183,21 +200,19 @@ class CASTLE():
         self.output_cluster(mc)
 
     # TODO: Check this function is correct #
-    def split(self, c):
+    def split(self, c: Cluster) -> List[Cluster]:
         """Splits a cluster <c>
 
         Args:
-            c (Cluster): The cluster that needs to be split into smaller
-			clusters
+            c: The cluster that needs to be split into smaller clusters
 
         Returns: List of new clusters with tuples inside them
 
         """
-        print("SPLITTING THE CLUSTER")
         sc = []
 
         # Group everyone by pid
-        buckets = {}
+        buckets: Dict[int, List[Item]] = {}
 
         # Insert all the tuples into the relevant buckets
         for t in c.contents:
@@ -263,13 +278,14 @@ class CASTLE():
 
         return sc
 
-    def merge_clusters(self, c):
-        """Merges a cluster <c> with another cluster in big_gamma \ <c>
+    def merge_clusters(self, c: Cluster) -> Cluster:
+        """Merges a cluster with other clusters in big_gamma until the size of
+        the resulting cluster is larger than k
 
         Args:
-            c (Cluster): The cluster that needs to be merged
+            c: The cluster that needs to be merged
 
-        Returns: void
+        Returns: A cluster with a size larger than or equal to k
 
         """
         gamma_c = [cluster for cluster in self.big_gamma if cluster != c]

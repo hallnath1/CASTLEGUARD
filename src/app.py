@@ -1,8 +1,8 @@
 import argparse
 
-def build_parser():
+def build_parser() -> argparse.ArgumentParser:
     """Builds the command line parser
-    Returns: TODO
+    Returns: An argument parser ready to parse arguments for this program
 
     """
     parser = argparse.ArgumentParser(
@@ -48,9 +48,10 @@ def build_parser():
 
     return parser
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     """Parses the arguments specified on the command line
-    Returns: TODO
+    Returns: The arguments that were specified on the command line and parsed
+    by the object returned by build_parser()
 
     """
     parser = build_parser()
