@@ -26,8 +26,8 @@ class Range():
         Returns: TODO
 
         """
-        self.lower = min(self.lower, value) if self.lower else value
-        self.upper = max(self.upper, value) if self.upper else value
+        self.lower = min(self.lower, value) if self.lower is not None else value
+        self.upper = max(self.upper, value) if self.upper is not None else value
 
     def VInfoLoss(self, I):
         """Calculates VinfoLoss of I defined on page 4 of castle paper.
