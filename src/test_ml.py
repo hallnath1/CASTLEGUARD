@@ -1,6 +1,7 @@
 import pandas as pd
 from castle import CASTLE
 import csv_gen
+import ml_utilities as mlu
 
 
 def handler(value: pd.Series):
@@ -19,6 +20,10 @@ if __name__=="__main__":
 	# 	stream.insert(row)
 
 	frame = pd.read_csv(csv_gen.generate_output_data("test")).sample(20)
-	print(frame)
+	sarray = []
+	for i in range(0, 20):
+		row = frame.iloc[0]
+		sarray.append(row)
+	mlu.average_group(sarray)
 
 

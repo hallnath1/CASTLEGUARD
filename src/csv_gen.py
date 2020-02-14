@@ -98,15 +98,3 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
                 row.append(str(max))
         f.write(','. join(row)+"\n")        
     return filename
-
-
-if __name__ == "__main__":
-    filename = generate_output_data(name="test")
-    print(filename)
-
-
-    
-
-        
-
-    
