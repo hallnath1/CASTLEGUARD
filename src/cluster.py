@@ -1,61 +1,64 @@
+from __future__ import annotations
+
 import copy
 import pandas as pd
 
+from typing import Dict, List
+
+from item import Item
 from range import Range
 
 class Cluster():
 
     """Stores tuples that are considered by the algorithm to be together. """
 
-    def __init__(self, headers):
+    def __init__(self, headers: List[str]):
         """Initialises the cluster """
-        self.contents = []
-        self.ranges = {}
+        self.contents: List[Item] = []
+        self.ranges: Dict[str, Range] = {}
 
         for header in headers:
             self.ranges[header] = Range()
 
-    def insert(self, element):
+    def insert(self, element: Item):
         """Inserts a tuple into the cluster
 
         Args:
-            element (TODO): TODO
-
-        Returns: TODO
+            element (Item): The element to insert into the cluster
 
         """
         self.contents.append(element)
         element.parent = self
 
-        # TODO: update ranges using element headers
-
         for k, v in self.ranges.items():
             v.update(element[k])
 
-    def generalise(self, t):
+    def generalise(self, t: Item) -> pd.Series:
         """Generalises a tuple based on the ranges for this cluster
 
         Args:
-            t (TODO): TODO
+            t (Item): The tuple to be generalised
 
-        Returns: TODO
+        Returns: A generalised version of the tuple based on the ranges for
+        this cluster
 
         """
-        # TODO: Actually make this generalise tuples #
         generalised = {}
+
         for h, v in self.ranges.items():
             generalised['min' + h] = v.lower
             generalised['max' + h] = v.upper
 
         return pd.Series(data=generalised)
 
-    def tuple_enlargement(self, t, global_ranges):
+    def tuple_enlargement(self, t: Item, global_ranges: Dict[str, Range]) -> float:
         """Calculates the enlargement value for adding <t> into this cluster
 
         Args:
-            t (TODO): TODO
+            t: The tuple to calculate enlargement based on
+            global_ranges: The globally known ranges for each attribute
 
-        Returns: TODO
+        Returns: The information loss if we added t into this cluster
 
         """
 
@@ -63,13 +66,14 @@ class Cluster():
 
         return info_loss / len(self.ranges)
 
-    def cluster_enlargement(self, c, global_ranges):
+    def cluster_enlargement(self, c: Cluster, global_ranges: Dict[str, Range]) -> float:
         """Calculates the enlargement value for merging <c> into this cluster
 
         Args:
-            c (TODO): TODO
+            c: The cluster to calculate information loss for
+            global_ranges: The globally known ranges for each attribute
 
-        Returns: TODO
+        Returns: The information loss upon merging c with this cluster
 
         """
 
@@ -77,13 +81,14 @@ class Cluster():
 
         return info_loss / len(self.ranges)
 
-    def information_loss_given_t(self, t, global_ranges):
+    def information_loss_given_t(self, t: Item, global_ranges: Dict[str, Range]) -> float:
         """Calculates the information loss upon adding <t> into this cluster
 
         Args:
-            t (TODO): TODO
+            t: The tuple to calculate information loss based on
+            global_ranges: The globally known ranges for each attribute
 
-        Returns: TODO
+        Returns: The information loss given that we insert t into this cluster
 
         """
         loss = 0
@@ -99,13 +104,14 @@ class Cluster():
 
         return loss
 
-    def information_loss_given_c(self, c, global_ranges):
+    def information_loss_given_c(self, c, global_ranges: Dict[str, Range]) -> float:
         """Calculates the information loss upon merging <c> into this cluster
 
         Args:
-            c (TODO): TODO
+            c: The cluster to calculate information loss based on
+            global_ranges: The globally known ranges for each attribute
 
-        Returns: TODO
+        Returns: The information loss given that we merge c with this cluster
 
         """
         loss = 0
@@ -121,10 +127,13 @@ class Cluster():
 
         return loss
 
-    def information_loss(self, global_ranges):
+    def information_loss(self, global_ranges: Dict[str, Range]) -> float:
         """Calculates the information loss of this cluster
 
-        Returns: information loss of cluster
+        Args:
+            global_ranges: The globally known ranges for each attribute
+
+        Returns: The current information loss of the cluster
 
         """
         loss = 0
@@ -134,13 +143,29 @@ class Cluster():
 
         return loss
 
-    def __len__(self):
+    def __len__(self) -> int:
+        """Calculates the length of this cluster
+        Returns: The number of tuples currently contained in the cluster
+
+        """
         return len(self.contents)
 
-    def __contains__(self, item):
-        return item in self.contents
+    def __contains__(self, t: Item) -> bool:
+        """Checks whether this cluster contains t
 
-    def __str__(self):
+        Args:
+            t: The tuple to find
+
+        Returns: Whether or not this cluster contains t
+
+        """
+        return t in self.contents
+
+    def __str__(self) -> str:
+        """Creates a string representation of the cluster
+        Returns: A string representation of the current cluster
+
+        """
         return "Tuples: {}, Ranges: {}".format(
             str(self.contents),
             str(self.ranges)

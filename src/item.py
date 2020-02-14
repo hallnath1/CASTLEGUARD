@@ -1,24 +1,48 @@
+from __future__ import annotations
+
 import math
+import pandas as pd
+
+from typing import Any, List
 
 class Item:
+    def __init__(self, data: pd.Series, headers: List[str]):
+        """Initialises an Item object
 
-    def __init__(self, data, headers):
-        self.data = data
-        self.headers = headers
+        Args:
+            data: The data that the item contains
+            headers: The columns/headers that we care about anonymising
 
-    def __getitem__(self, key):
+        """
+        self.data: pd.Series = data
+        self.headers: List[str] = headers
+        self.parent = None
+
+    def __getitem__(self, key: str) -> Any:
+        """Gets the attribute-value for a given key
+
+        Args:
+            key: The key to get the data for
+
+        Returns: The value for the given key
+
+        """
         return self.data[key]
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Creates a string representation of the tuple
+        Returns: A string representation of the tuple
+
+        """
         return self.data.to_string()
 
-    def tuple_distance(self, t):
+    def tuple_distance(self, t: Item) -> float:
         """Calculates the distance between the two tuples
 
         Args:
-            t (TODO): TODO
+            t: The tuple to calculate the distance to
 
-        Returns: TODO
+        Returns: The distance to the tuple
 
         """
         s = self.data[self.headers]

@@ -7,16 +7,17 @@ import matplotlib.patches as patches
 import app
 
 from castle import CASTLE
+from range import Range
 
-def handler(value):
+def handler(value: pd.Series):
     print("RECIEVED VALUE: {}".format(value))
 
-def create_rectangle(rx, ry):
+def create_rectangle(rx: Range, ry: Range) -> patches.Rectangle:
     width = rx.upper - rx.lower
     height = ry.upper - ry.lower
     return patches.Rectangle((rx.lower, ry.lower), width, height, fill=False)
 
-def display_visualisation(stream):
+def display_visualisation(stream: CASTLE):
     fig, ax = plt.subplots(1)
 
     for cluster in stream.big_gamma:
