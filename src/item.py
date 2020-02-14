@@ -12,6 +12,9 @@ class Item:
     def __str__(self):
         return self.data.to_string()
 
+    def __eq__(self, i):
+        return self.headers == i.headers and self.data.equals(i.data)
+
     def tuple_distance(self, t):
         """Calculates the distance between the two tuples
 
