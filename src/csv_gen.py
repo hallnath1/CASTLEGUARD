@@ -94,6 +94,14 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
                     min = random.uniform(0, max)
                     if type(max) is int:
                         min = int(min)
+                        while min == max:
+                            if max == 0:
+                                max = 1
+                            min = int(random.uniform(0, max))
+                            
+                    else:
+                        while min == max:
+                            min = random.uniform(0, max)
                     row.append(str(min))
                 row.append(str(max))
         f.write(','. join(row)+"\n")        

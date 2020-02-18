@@ -22,8 +22,8 @@ if __name__=="__main__":
 	frame = pd.read_csv(csv_gen.generate_output_data("test")).sample(20)
 	sarray = []
 	for i in range(0, 20):
-		row = frame.iloc[0]
+		row = frame.iloc[i]
 		sarray.append(row)
-	mlu.average_group(sarray)
+	print("Average of series objects: \n{}".format(mlu.average_group(sarray)))
 
 
