@@ -90,7 +90,7 @@ class CASTLE():
         if len(self.global_tuple) > self.delta:
             # Get the next tuple to be output
             t_prime = self.global_tuple.popleft()
-            print("Attempting to output: {}".format(t_prime))
+            print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
 
         # Let t' be the tuple with position equal to t.p - delta

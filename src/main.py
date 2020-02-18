@@ -10,7 +10,7 @@ from castle import CASTLE
 from range import Range
 
 def handler(value: pd.Series):
-    print("RECIEVED VALUE: {}".format(value))
+    print("RECIEVED VALUE: \n{}".format(value))
 
 def create_rectangle(rx: Range, ry: Range) -> patches.Rectangle:
     width = rx.upper - rx.lower
