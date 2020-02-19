@@ -2,7 +2,10 @@ import pandas as pd
 from castle import CASTLE
 import csv_gen
 import ml_utilities as mlu
+from sklearn.neighbors import KNeighborsClassifier
 
+def normalise(dataset, ax=0):
+    return (dataset - dataset.mean(axis=ax))/dataset.std(axis=ax)
 
 def handler(value: pd.Series):
 	print("RECIEVED VALUE: {}".format(value))
