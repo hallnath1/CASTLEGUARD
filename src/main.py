@@ -38,7 +38,7 @@ def main():
 
     frame = pd.read_csv(args.filename).sample(20)
 
-    headers = list(frame.columns.values)
+    headers = ["PickupLocationID", "TripDistance"]
     stream = CASTLE(handler, headers, args.k, args.delta, args.beta)
 
     for (_, row) in frame.iterrows():
