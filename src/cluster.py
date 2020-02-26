@@ -43,15 +43,16 @@ class Cluster():
         this cluster
 
         """
+        gen_tuple = t.copy()
         for h, v in self.ranges.items():
-            t.data.loc['min' + h] = v.lower
-            t.data.loc['max' + h] = v.upper
-            t.headers.append('min' + h)
-            t.headers.append('max' + h)
-            t.headers.remove(h)
-            del t.data[h]
+            gen_tuple.data.loc['min' + h] = v.lower
+            gen_tuple.data.loc['max' + h] = v.upper
+            gen_tuple.headers.append('min' + h)
+            gen_tuple.headers.append('max' + h)
+            gen_tuple.headers.remove(h)
+            del gen_tuple.data[h]
 
-        return t
+        return t, gen_tuple
 
     def tuple_enlargement(self, t: Item, global_ranges: Dict[str, Range]) -> float:
         """Calculates the enlargement value for adding <t> into this cluster

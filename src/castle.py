@@ -108,7 +108,7 @@ class CASTLE():
 
         for cluster in sc:
             for t in cluster.contents:
-                generalised = cluster.generalise(t)
+                generalised = cluster.generalise(t)[1]
                 self.callback(generalised)
 
             # TODO: Update self.tau according to infoLoss(cluster) #
