@@ -34,6 +34,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--mu",
+        nargs="?",
+        default=5,
+        type=int,
+        help="The number of most recent loss values to use for tau"
+    )
+
+    parser.add_argument(
         "-f", "--filename",
         nargs="?",
         default="data.csv",
