@@ -51,7 +51,7 @@ class CASTLE():
             self.global_ranges[header] = Range()
 
         # Deque of all tuple objects and parent cluster pairs
-        self.global_tuple: Deque = deque()
+        self.global_tuples: Deque = deque()
 
     def update_global_ranges(self, data: Item):
         """Updates the globally known ranges for each column based on the value
@@ -84,12 +84,12 @@ class CASTLE():
             self.big_gamma.append(cluster)
 
         cluster.insert(item)
-        self.global_tuple.append(item)
+        self.global_tuples.append(item)
 
         # If we now have too many tuples, try and output one
-        if len(self.global_tuple) > self.delta:
+        if len(self.global_tuples) > self.delta:
             # Get the next tuple to be output
-            t_prime = self.global_tuple.popleft()
+            t_prime = self.global_tuples[0]
             print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
 
@@ -108,16 +108,19 @@ class CASTLE():
 
         for cluster in sc:
             for t in cluster.contents:
-                generalised = cluster.generalise(t)
+                [generalised, original_tuple] = cluster.generalise(t)
+                print("OUTPUT")
                 self.callback(generalised)
+                self.global_tuples.remove(original_tuple)
 
             # TODO: Update self.tau according to infoLoss(cluster) #
             # TODO: Decide whether to delete cluster or move to self.big_omega #
             # TODO: This should probably happen #
             # self.big_gamma.remove(cluster)
 
-        for t in cluster.contents:
-            self.callback(t)
+        # for t in cluster.contents:
+        #     print("FOR T")
+        #     self.callback(t)
 
     def best_selection(self, t: Item) -> Optional[Cluster]:
         """Finds the best matching cluster for <element>
@@ -187,12 +190,14 @@ class CASTLE():
 
         if m > len(self.big_gamma) / 2:
             # TODO: Suppress t somehow #
+            self.global_tuples.remove(t)
             return
 
         total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
 
         if total_cluster_size < self.k:
             # TODO: Suppress t somehow #
+            self.global_tuples.remove(t)
             return
 
         mc = self.merge_clusters(t.parent)
@@ -263,7 +268,6 @@ class CASTLE():
 
                     if not buckets[key]:
                         del buckets[key]
-
 
             sc.append(cnew)
 
