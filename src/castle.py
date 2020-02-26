@@ -28,7 +28,7 @@ class CASTLE():
         self.callback: Callable[[pd.Series], None] = callback
 
         self.deque: Deque = deque()
-        self.headers: List[str] = headers[1:]
+        self.headers: List[str] = headers
 
         # Required number of tuples for a cluster to be complete
         self.k: int = k
@@ -51,7 +51,7 @@ class CASTLE():
             self.global_ranges[header] = Range()
 
         # Deque of all tuple objects and parent cluster pairs
-        self.global_tuple: Deque = deque()
+        self.global_tuples: Deque = deque()
 
     def update_global_ranges(self, data: Item):
         """Updates the globally known ranges for each column based on the value
@@ -84,13 +84,13 @@ class CASTLE():
             self.big_gamma.append(cluster)
 
         cluster.insert(item)
-        self.global_tuple.append(item)
+        self.global_tuples.append(item)
 
         # If we now have too many tuples, try and output one
-        if len(self.global_tuple) > self.delta:
+        if len(self.global_tuples) > self.delta:
             # Get the next tuple to be output
-            t_prime = self.global_tuple.popleft()
-            print("Attempting to output: {}".format(t_prime))
+            t_prime = self.global_tuples.popleft()
+            print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
 
         # Let t' be the tuple with position equal to t.p - delta
@@ -263,7 +263,6 @@ class CASTLE():
 
                     if not buckets[key]:
                         del buckets[key]
-
 
             sc.append(cnew)
 

@@ -10,7 +10,7 @@ from castle import CASTLE
 from range import Range
 
 def handler(value: pd.Series):
-    print("RECIEVED VALUE: {}".format(value))
+    print("RECIEVED VALUE: \n{}".format(value))
 
 def create_rectangle(rx: Range, ry: Range) -> patches.Rectangle:
     width = rx.upper - rx.lower
@@ -38,7 +38,7 @@ def main():
 
     frame = pd.read_csv(args.filename).sample(20)
 
-    headers = list(frame.columns.values)
+    headers = ["PickupLocationID", "TripDistance"]
     stream = CASTLE(handler, headers, args.k, args.delta, args.beta)
 
     for (_, row) in frame.iterrows():
