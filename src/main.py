@@ -1,5 +1,6 @@
 import time
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -35,8 +36,13 @@ def display_visualisation(stream: CASTLE):
 
 def main():
     args = app.parse_args()
+    print("args: {}".format(args))
 
-    frame = pd.read_csv(args.filename).sample(20)
+    seed = args.seed if args.seed else np.random.randint(1e6)
+    np.random.seed(seed)
+    print("USING RANDOM SEED: {}".format(seed))
+
+    frame = pd.read_csv(args.filename).sample(args.sample_size)
 
     headers = ["PickupLocationID", "TripDistance"]
     params = Parameters(args.k, args.delta, args.beta, args.mu)
