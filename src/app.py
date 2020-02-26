@@ -42,6 +42,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--seed",
+        type=int,
+        help="The random seed to use for the simulation"
+    )
+
+    parser.add_argument(
+        "--sample-size",
+        nargs="?",
+        default=20,
+        type=int,
+        help="The number of samples to use for the simulation"
+    )
+
+    parser.add_argument(
         "-f", "--filename",
         nargs="?",
         default="data.csv",
