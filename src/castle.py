@@ -159,6 +159,21 @@ class CASTLE():
             total_loss = sum(c.information_loss(self.global_ranges) for c in chosen)
             self.tau = total_loss / sample_size
 
+    def suppress_tuple(self, t: Item):
+        """Suppresses a tuple from being output and deletes it from the CASTLE
+        state. Removes it from the global tuple queue and also the cluster it
+        is being contained in
+
+        Args:
+            t: The tuple to suppress
+
+        """
+        # Remove the tuple from the global queue
+        self.global_tuples.remove(t)
+        # Remove the tuple from its cluster
+        containing_cluster = t.parent
+        containing_cluster.remove(t)
+
     def best_selection(self, t: Item) -> Optional[Cluster]:
         """Finds the best matching cluster for <element>
 
@@ -226,16 +241,12 @@ class CASTLE():
                 m += 1
 
         if m > len(self.big_gamma) / 2:
-            # TODO: Suppress t somehow #
-            self.global_tuples.remove(t)
-            return
+            return self.suppress_tuple(t)
 
         total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
 
         if total_cluster_size < self.k:
-            # TODO: Suppress t somehow #
-            self.global_tuples.remove(t)
-            return
+            return self.suppress_tuple(t)
 
         mc = self.merge_clusters(t.parent)
 

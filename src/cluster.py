@@ -33,6 +33,15 @@ class Cluster():
         for k, v in self.ranges.items():
             v.update(element[k])
 
+    def remove(self, element: Item):
+        """Removes a tuple from the cluster
+
+        Args:
+            element: The element to remove from the cluster
+
+        """
+        self.contents.remove(element)
+
     def generalise(self, t: Item) -> pd.Series:
         """Generalises a tuple based on the ranges for this cluster
 
