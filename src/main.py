@@ -6,7 +6,7 @@ import matplotlib.patches as patches
 
 import app
 
-from castle import CASTLE
+from castle import CASTLE, Parameters
 from range import Range
 
 def handler(value: pd.Series):
@@ -39,7 +39,8 @@ def main():
     frame = pd.read_csv(args.filename).sample(20)
 
     headers = ["PickupLocationID", "TripDistance"]
-    stream = CASTLE(handler, headers, args.k, args.delta, args.beta, args.mu)
+    params = Parameters(args.k, args.delta, args.beta, args.mu)
+    stream = CASTLE(handler, headers, params)
 
     for (_, row) in frame.iterrows():
         stream.insert(row)

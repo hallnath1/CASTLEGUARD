@@ -4,17 +4,25 @@ import pandas as pd
 
 from typing import Any, Callable, Deque, Dict, List, Optional
 from collections import deque
+from dataclasses import dataclass
 
 from cluster import Cluster
 from range import Range
 from item import Item
+
+@dataclass
+class Parameters:
+    k: int
+    delta: int
+    beta: int
+    mu: int
 
 class CASTLE():
 
     """An implementation of the CASTLE Algorithm designed by Jianneng Cao,
     Barbara Carminati, Elena Ferrari and Kian-Lee Tan."""
 
-    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], k: int, delta: int, beta: int, mu: int):
+    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], params: Parameters):
         """Initialises the CASTLE algorithm with necessary parameters.
 
         Args:
@@ -31,16 +39,16 @@ class CASTLE():
         self.headers: List[str] = headers
 
         # Required number of tuples for a cluster to be complete
-        self.k: int = k
+        self.k: int = params.k
         # Maximum number of active tuples
-        self.delta: int = delta
+        self.delta: int = params.delta
         # Maximum number of clusters that can be active
-        self.beta: int = beta
+        self.beta: int = params.beta
         # Maximum amount of information loss, by default set to infinity as we
         # have no clusters
         self.tau: float = math.inf
         # Number of values to use in the rolling average
-        self.mu: int = mu
+        self.mu: int = params.mu
 
         # Set of non-ks anonymised clusters
         self.big_gamma: List[Cluster] = []
