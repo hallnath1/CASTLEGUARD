@@ -14,7 +14,7 @@ class CASTLE():
     """An implementation of the CASTLE Algorithm designed by Jianneng Cao,
     Barbara Carminati, Elena Ferrari and Kian-Lee Tan."""
 
-    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], k: int, delta: int, beta: int):
+    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], k: int, delta: int, beta: int, mu: int):
         """Initialises the CASTLE algorithm with necessary parameters.
 
         Args:
@@ -36,8 +36,11 @@ class CASTLE():
         self.delta: int = delta
         # Maximum number of clusters that can be active
         self.beta: int = beta
-        # Maximum amount of information loss, currently set to max
-        self.tau: float = -math.inf
+        # Maximum amount of information loss, by default set to infinity as we
+        # have no clusters
+        self.tau: float = math.inf
+        # Number of values to use in the rolling average
+        self.mu: int = mu
 
         # Set of non-ks anonymised clusters
         self.big_gamma: List[Cluster] = []
@@ -52,6 +55,9 @@ class CASTLE():
 
         # Deque of all tuple objects and parent cluster pairs
         self.global_tuples: Deque = deque()
+
+        # Rolling values of information loss for tau
+        self.recent_losses = []
 
     def update_global_ranges(self, data: Item):
         """Updates the globally known ranges for each column based on the value
@@ -93,9 +99,7 @@ class CASTLE():
             print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
 
-        # Let t' be the tuple with position equal to t.p - delta
-        # if t' has not yet been output then
-            # delay_constraint(t')
+        self.update_tau()
 
     def output_cluster(self, c: Cluster):
         """Outputs a cluster according to the algorithm
@@ -113,6 +117,16 @@ class CASTLE():
                 self.callback(generalised)
                 self.global_tuples.remove(original_tuple)
 
+            # Calculate the information loss of the cluster
+            info_loss = cluster.information_loss(self.global_ranges)
+            self.recent_losses.append(info_loss)
+
+            # If there are too many elements in here, remove one
+            if len(self.recent_losses) > self.mu:
+                self.recent_losses.pop(0)
+
+            self.update_tau()
+
             # TODO: Update self.tau according to infoLoss(cluster) #
             # TODO: Decide whether to delete cluster or move to self.big_omega #
             # TODO: This should probably happen #
@@ -121,6 +135,21 @@ class CASTLE():
         # for t in cluster.contents:
         #     print("FOR T")
         #     self.callback(t)
+
+    def update_tau(self):
+        self.tau = math.inf
+
+        # If we have elements in recent_losses, take an average
+        if self.recent_losses:
+            self.tau = sum(self.recent_losses) / len(self.recent_losses)
+        elif self.big_gamma:
+            # Get 5 elements if we have them, otherwise just get all of them
+            sample_size = min(len(self.big_gamma), 5)
+            chosen = random.sample(self.big_gamma, sample_size)
+
+            # Sum the information loss for each chosen cluster
+            total_loss = sum(c.information_loss(self.global_ranges) for c in chosen)
+            self.tau = total_loss / sample_size
 
     def best_selection(self, t: Item) -> Optional[Cluster]:
         """Finds the best matching cluster for <element>

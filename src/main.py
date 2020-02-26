@@ -39,7 +39,7 @@ def main():
     frame = pd.read_csv(args.filename).sample(20)
 
     headers = ["PickupLocationID", "TripDistance"]
-    stream = CASTLE(handler, headers, args.k, args.delta, args.beta)
+    stream = CASTLE(handler, headers, args.k, args.delta, args.beta, args.mu)
 
     for (_, row) in frame.iterrows():
         stream.insert(row)
