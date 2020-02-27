@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import pandas as pd
 
-from typing import Dict, List
+from typing import Dict, List, Set, Any
 
 from item import Item
 from range import Range
@@ -19,6 +19,8 @@ class Cluster():
 
         for header in headers:
             self.ranges[header] = Range()
+        
+        self.diversity : Set[Any] = set()
 
     def insert(self, element: Item):
         """Inserts a tuple into the cluster
@@ -28,6 +30,7 @@ class Cluster():
 
         """
         self.contents.append(element)
+        self.diversity.add(element.sensitive_attr)
         element.parent = self
 
         for k, v in self.ranges.items():
@@ -154,6 +157,14 @@ class Cluster():
             loss += r / global_range
 
         return loss
+    
+    def distance(self, t: Item):
+        "TODO: can be updated to use global ranges"
+        total_distance = 0
+        for header, range in self.ranges.items():
+            total_distance += abs(t[header] - (range.upper - range.lower))
+        
+        return total_distance
 
     def __len__(self) -> int:
         """Calculates the length of this cluster
