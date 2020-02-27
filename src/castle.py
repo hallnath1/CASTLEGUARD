@@ -17,13 +17,14 @@ class Parameters:
     delta: int
     beta: int
     mu: int
+    l: int
 
 class CASTLE():
 
     """An implementation of the CASTLE Algorithm designed by Jianneng Cao,
     Barbara Carminati, Elena Ferrari and Kian-Lee Tan."""
 
-    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], params: Parameters):
+    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], sensitive_attr: str, params: Parameters):
         """Initialises the CASTLE algorithm with necessary parameters.
 
         Args:
@@ -38,6 +39,7 @@ class CASTLE():
 
         self.deque: Deque = deque()
         self.headers: List[str] = headers
+        self.sensitive_attr: str = sensitive_attr
 
         # Required number of tuples for a cluster to be complete
         self.k: int = params.k
@@ -50,6 +52,8 @@ class CASTLE():
         self.tau: float = math.inf
         # Number of values to use in the rolling average
         self.mu: int = params.mu
+        # Required number of distinct sensitive attributes for a cluster to be complete
+        self.l: int = params.l
 
         # Set of non-ks anonymised clusters
         self.big_gamma: List[Cluster] = []
@@ -88,7 +92,7 @@ class CASTLE():
 
         """
         # Update the global range values
-        item = Item(data=data, headers=self.headers)
+        item = Item(data=data, headers=self.headers, sensitive_attr=self.sensitive_attr)
         self.update_global_ranges(item)
 
         cluster = self.best_selection(item)
@@ -119,7 +123,7 @@ class CASTLE():
         """
         # Get the number of unique PIDs in the cluster
         unique_pids = len(set(t['pid'] for t in c.contents))
-        sc = [c] if unique_pids < 2 * self.k else self.split(c)
+        sc = [c] if unique_pids < 2 * self.k and len(c.diversity) < self.l else self.split_l(c)
 
         for cluster in sc:
             for t in cluster.contents:
@@ -224,7 +228,7 @@ class CASTLE():
             t: The tuple to make decisions based on
 
         """
-        if self.k <= len(t.parent):
+        if self.k <= len(t.parent) and self.l < len(t.parent.diversity):
             self.output_cluster(t.parent)
             return
 
@@ -248,8 +252,10 @@ class CASTLE():
             return self.suppress_tuple(t)
 
         total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
+        total_diversity = all(len(cluster.diversity) > self.l for cluster in self.big_gamma)
 
-        if total_cluster_size < self.k:
+
+        if total_cluster_size < self.k and not total_diversity:
             return self.suppress_tuple(t)
 
         mc = self.merge_clusters(t.parent)
@@ -333,6 +339,90 @@ class CASTLE():
                 nearest.insert(t)
 
         return sc
+
+    # TODO: Check this function is correct #
+    def split_l(self, C: Cluster) -> List[Cluster]:
+        """Splits a cluster <c> ensuring l-diversity
+
+        Args:
+            C: The cluster that needs to be split into smaller clusters
+
+        Returns: List of new clusters with tuples inside them
+
+        """
+        sc = []
+
+        # Group every tuple by the sensitive attribute
+        buckets = self.generate_buckets(C)
+
+        # if number of buckets is less than l cannot split
+        if len(buckets) < self.l:
+            return C
+
+        # While length of buckets greater than l and more than k tuples
+        while len(buckets) >= self.l and sum([len(b) for b in buckets.values()]) >= self.k:
+
+            # Pick a random tuple from a random bucket
+            pid = np.random.choice(list(buckets.keys()))
+            bucket = buckets[pid]
+            t = bucket.pop(np.random.randint(0, len(bucket) - 1))
+
+            # Create a new subcluster over t
+            cnew = Cluster(self.headers)
+            cnew.insert(t)
+
+            # Delete t from b
+            del buckets[pid]
+
+
+            for bucket in buckets.values():
+
+                # Sort the bucket by the enlargement value of that cluster
+                sorted_bucket = sorted(bucket, key=lambda t: C.tuple_enlargement(t, self.global_ranges))
+                tuples = self.k * (len(sorted_bucket) / sum([len(b) for b in buckets]))
+
+                # Insert the top Tj tuples in a new cluster
+                for t in sorted_bucket[:tuples]:
+                    cnew.insert(t)
+                    bucket.remove(t)
+
+                # if bucket is empty delete the bucket
+                if not bucket:
+                    del bucket
+
+            sc.append(cnew)
+            self.big_gamma.append(cnew)
+
+        # For all remaining tuples in this cluster add them to the nearest cluster
+        for bucket in buckets.values():
+            for t in bucket:
+                cluster = min(sc, key=lambda c: c.distance(t))
+                cluster.insert(t)
+
+            del bucket
+
+        # This is in the pseudo code
+        for c in sc:
+            for t in c:
+                G = {t_h for t_h in C if t_h.pid == t.pid}
+                for g in G:
+                    c.insert(t)
+                    C.remove(g)
+
+        return sc
+
+    def generate_buckets(self, C: Cluster):
+        # Group everyone by sensitive attribute
+        buckets: Dict[Any, List[Item]] = {}
+
+        # Insert all the tuples into the relevant buckets
+        for t in C.contents:
+            if t.data.self.sensitive_attr not in buckets:
+                buckets[self.sensitive_attr] = []
+
+            buckets[self.sensitive_attr].append(t)
+
+        return buckets
 
     def merge_clusters(self, c: Cluster) -> Cluster:
         """Merges a cluster with other clusters in big_gamma until the size of

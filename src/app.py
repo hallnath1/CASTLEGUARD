@@ -42,6 +42,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
+        "--l",
+        nargs="?",
+        default=5,
+        type=int,
+        help="The value of l to use"
+    )
+
+    parser.add_argument(
         "--seed",
         type=int,
         help="The random seed to use for the simulation"

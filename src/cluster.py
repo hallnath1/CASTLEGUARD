@@ -4,7 +4,7 @@ import copy
 import numpy as np
 import pandas as pd
 
-from typing import Dict, List
+from typing import Dict, List, Set, Any
 
 from item import Item
 from range import Range
@@ -20,6 +20,8 @@ class Cluster():
 
         for header in headers:
             self.ranges[header] = Range()
+        
+        self.diversity : Set[Any] = set()
 
         self.sample_values: Dict[str, float] = {}
 
@@ -36,6 +38,9 @@ class Cluster():
         if element.parent:
             # If it is, remove it so that we do not reach an invalid state
             element.parent.remove(element)
+
+        # add sensitive attribute value to the diversity of cluster
+        self.diversity.add(element.sensitive_attr)
 
         # Update the parent of the item to be this cluster
         element.parent = self
@@ -176,6 +181,14 @@ class Cluster():
             loss += r / global_range
 
         return loss
+    
+    def distance(self, t: Item):
+        "TODO: can be updated to use global ranges"
+        total_distance = 0
+        for header, range in self.ranges.items():
+            total_distance += abs(t[header] - (range.upper - range.lower))
+        
+        return total_distance
 
     def within_bounds(self, t: Item) -> bool:
         """Checks whether a tuple is within all the ranges of the this
