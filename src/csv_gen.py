@@ -98,7 +98,6 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
     f, filename = create_file(name)
     temp = []
     temp.append("pid")
-    pid = 1
     for i in range(0, len(headers)):
         # In this loop, each header should be check if its in generalise
         # If it is, create a min and a max 
