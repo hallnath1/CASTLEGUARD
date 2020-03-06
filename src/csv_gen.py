@@ -103,6 +103,7 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
         # If it is, create a min and a max 
         if headers[i] in generalise:
             temp.append("min"+headers[i])
+            temp.append("med"+headers[i])
             temp.append("max"+headers[i])
         else:
             temp.append(headers[i])
@@ -119,17 +120,22 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
                 max = gen_rand_number(datatypes[i])
                 if headers[i] in generalise:
                     min = random.uniform(0, max)
+                    med = random.uniform(min, max)
                     if type(max) is int:
                         min = int(min)
+                        med = int(med)
                         while min == max:
                             if max == 0:
                                 max = 1
                             min = int(random.uniform(0, max))
+                            med = int(random.uniform(med, max))
                             
                     else:
                         while min == max:
                             min = random.uniform(0, max)
+                            med = random.uniform(min, max)
                     row.append(str(min))
+                    row.append(str(med))
                 row.append(str(max))
         f.write(','. join(row)+"\n")        
     return filename

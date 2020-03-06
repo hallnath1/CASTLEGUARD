@@ -71,7 +71,6 @@ if __name__=="__main__":
 	for i in range(0, rows):
 		row = frame.iloc[i]
 		sarray.append(row)
-
 	avg = mlu.average_group(sarray)
 	avg_features = avg[["Age", "HoursPW", "EducationLvl", "GPA"]]
 	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
