@@ -225,14 +225,15 @@ class CASTLE():
             self.output_cluster(t.parent)
             return
 
-        # Get all the clusters that contain t
-        # TODO: This most likely needs to be 'contains', eg within bounds #
-        KCset = [cluster for cluster in self.big_omega if t in cluster]
+        # Get all the clusters that t could be within
+        KCset = [c for c in self.big_omega if c.within_bounds(t)]
 
         if KCset:
-            generalised = cluster.generalise(t)
-            self.callback(generalised)
-            return
+            # Pick a random cluster from the set and generalise, then output
+            random_cluster = random.choice(KCset)
+            generalised, original = random_cluster.generalise(t)
+            self.global_tuples.remove(original)
+            return self.callback(t)
 
         m = 0
 

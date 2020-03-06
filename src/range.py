@@ -40,6 +40,17 @@ class Range():
         """
         return (self.upper - self.lower) / (other.upper - other.lower)
 
+    def within_bounds(self, value: float):
+        """Checks whether the value is within the bounds of the range.
+
+        Args:
+            value: The value to perform bounds checking for
+
+        Returns: Whether or not the value is in bounds
+
+        """
+        return self.lower <= value and value <= self.upper
+
     def __truediv__(self, other: Range):
         """Allows for the shorthand notation r1/r2 instead of r1.VInfoLoss(r2)
 
