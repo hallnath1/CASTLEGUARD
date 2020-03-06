@@ -121,7 +121,6 @@ class CASTLE():
         for cluster in sc:
             for t in cluster.contents:
                 [generalised, original_tuple] = cluster.generalise(t)
-                print("OUTPUT")
                 self.callback(generalised)
                 self.global_tuples.remove(original_tuple)
 
