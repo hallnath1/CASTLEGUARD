@@ -10,6 +10,7 @@ insert_time_list = []
 counter = 0
 filename = "test"
 rows=1000
+sarray = []
 
 def normalise(dataset, ax=0):
 	return (dataset - dataset.mean(axis=ax))/dataset.std(axis=ax)
@@ -45,11 +46,12 @@ def validation(features, labels, nb):
 def handler(value: pd.Series):
 	print("RECIEVED VALUE: {}".format(value))
 	insert_time_list.append(counter)
+	sarray.append(value)
 
 if __name__=="__main__":
 
 	
-	# frame = pd.read_csv(args.filename).sample(20)
+	# frame = pd.read_csv(args.filename)
 	
 	# headers = list(frame.columns.values)
 	
@@ -66,7 +68,6 @@ if __name__=="__main__":
 													headers=["Age","GPA", "HoursPW", "EducationLvl", "Employed"], 
 													datatypes=["int120","float5", "int56", "int6", "int2"], 
 													generalise=["Age","GPA", "HoursPW", "EducationLvl"]))
-	sarray = []
 	for i in range(0, rows):
 		row = frame.iloc[i]
 		sarray.append(row)
@@ -77,4 +78,3 @@ if __name__=="__main__":
 	for i in range(1, 10):
 		print("Avg for k = "+str(i)+": "+str(validation(avg_norm, avg["Employed"], i)))
 	os.remove("{}.csv".format(filename))
-
