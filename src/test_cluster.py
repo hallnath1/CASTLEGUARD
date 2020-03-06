@@ -14,7 +14,7 @@ def test_generalise():
     c.insert(a)
     c.insert(b)
 
-    t = c.generalise(t)
+    t, orig = c.generalise(t)
     d = {"pid":1, "minPickupLocationID":49, "maxPickupLocationID":264, "minTripDistance":.00, "maxTripDistance":0.86}
     df = pd.Series(data=d)
     test = Item(df ,headers=["minPickupLocationID", "maxPickupLocationID", "minTripDistance", "maxTripDistance"])
