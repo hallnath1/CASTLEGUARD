@@ -155,6 +155,22 @@ class Cluster():
 
         return loss
 
+    def within_bounds(self, t: Item) -> bool:
+        """Checks whether a tuple is within all the ranges of the this
+        cluster, eg. would cause no information loss on being entered.
+
+        Args:
+            t: The tuple to perform bounds checking on
+
+        Returns: Whether or not the tuple is within the bounds of the cluster
+
+        """
+        for k, v in self.ranges.items():
+            if not v.within_bounds(t[k]):
+                return False
+
+        return True
+
     def __len__(self) -> int:
         """Calculates the length of this cluster
         Returns: The number of tuples currently contained in the cluster

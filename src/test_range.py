@@ -18,3 +18,11 @@ def test_range_information_loss():
     I = Range(0, 20)
 
     assert r / I == 0.25
+
+def test_within_range():
+    r = Range(5, 10)
+    assert r.within_bounds(7)
+
+def test_out_of_range():
+    r = Range(5, 10)
+    assert not r.within_bounds(11)

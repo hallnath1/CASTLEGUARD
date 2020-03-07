@@ -1,6 +1,9 @@
+import numpy as np
+import pandas as pd
+
 from cluster import Cluster
 from item import Item
-import pandas as pd
+from range import Range
 
 def test_generalise():
 
@@ -20,3 +23,57 @@ def test_generalise():
     test = Item(df ,headers=["minPickupLocationID", "maxPickupLocationID", "minTripDistance", "maxTripDistance"])
 
     assert t == test
+
+def test_within_bounds_after_insert():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+    c.insert(t)
+
+    assert c.within_bounds(t)
+
+def test_within_bounds():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+    c.ranges = {
+        "Age": Range(20, 25),
+        "Salary": Range(27, 32)
+    }
+
+    assert c.within_bounds(t)
+
+def test_out_of_bounds():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+    c.ranges = {
+        "Age": Range(20, 24),
+        "Salary": Range(27, 32)
+    }
+
+    assert not c.within_bounds(t)
