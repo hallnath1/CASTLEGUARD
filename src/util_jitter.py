@@ -4,29 +4,32 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 
+import app
 from castle import CASTLE, Parameters
 
-seconds = 0
+"""
+    Note: Not all tuples are outputted due to algorithm assuming a continuous stream, 
+    so some inputs are ignored in the calculation
+"""
+
+latency_dict = {}
 latency_list = []
 
 def handler(value: pd.Series):
-    global seconds
-    latency = time.time()-seconds
-    latency_list.append(latency)
-    print("Cluster Dispactched after {}s".format(latency))
+
+    latency_list.append(time.time()-latency_dict[value["pid"]])
+
     print("RECIEVED VALUE: \n{}".format(value))
-    seconds = time.time()
     
 
 def jitter_wrapper(params, frame):
-    global seconds
-    frame = pd.read_csv("data.csv")
-    headers = list(frame.columns.values)
+    headers = ["PickupLocationID", "TripDistance"]
     
     stream = CASTLE(handler, headers, params)
       
     for (_, row) in frame.iterrows():
-        seconds = time.time()  
+        
+        latency_dict[row["pid"]] = time.time()
         stream.insert(row)
 
     jitter = 0
@@ -37,10 +40,29 @@ def jitter_wrapper(params, frame):
     return jitter
 
 if __name__ == "__main__":
-    frame = pd.read_csv("data.csv")
-    for k in [5,10,15,20]:
-        params = Parameters(k,10,10,10)
-        jitter = jitter_wrapper(params, frame)
-        print(jitter)
+    args = app.parse_args()
+    print("args: {}".format(args))
+
+    seed = args.seed if args.seed else np.random.randint(1e6)
+    np.random.seed(seed)
+    print("USING RANDOM SEED: {}".format(seed))
+
+    frame = pd.read_csv(args.filename).sample(20)
+
+    params = Parameters(args.k, args.delta, args.beta, args.mu)
+    jitter = jitter_wrapper(params, frame)
+    print("JITTER: {}s".format(jitter))
+    
+
+
+        
+
+    
+
+    
+
+ 
+  
+ 
 
 
