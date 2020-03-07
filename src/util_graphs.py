@@ -48,7 +48,31 @@ def test_beta(file_name, beta_list):
         avg_loss_list.append(avg_loss)
     
     plot_average_loss_1D(avg_loss_list, beta_list, "Beta")
- 
+
+
+def test_k(file_name, k_list):
+    frame = pd.read_csv(file_name)
+    headers = list(frame.columns.values)
+
+    avg_loss_list = []
+
+    for k in k_list:
+        stream = CASTLE(handler, headers,Parameters(k, 10, 10, 10))
+     
+        for (_, row) in frame.iterrows():
+            stream.insert(row)
+        
+        clusters = stream.big_gamma
+        
+        cum_loss = 0
+        for cluster in clusters:
+            cum_loss += cluster.information_loss(stream.global_ranges)
+        avg_loss = cum_loss / len(clusters)
+    
+        avg_loss_list.append(avg_loss)
+    
+    plot_average_loss_1D(avg_loss_list, k_list, "k")
+
 def test_beta_mu(file_name, beta_list, mu_list):
     frame = pd.read_csv(file_name)
     headers = list(frame.columns.values)
