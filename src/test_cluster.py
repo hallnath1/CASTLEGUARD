@@ -14,7 +14,8 @@ def test_generalise():
             data=np.array([25, 30]),
             index=headers
         ),
-        headers
+        headers,
+        sensitive_attr=None
     )
 
     b = Item(
@@ -22,7 +23,8 @@ def test_generalise():
             data=np.array([22, 27]),
             index=headers
         ),
-        headers
+        headers,
+        sensitive_attr=None
     )
 
     c = Cluster(headers)
@@ -43,7 +45,8 @@ def test_generalise():
             data=np.array([22, 25, 25, 27, 27, 30]),
             index=generalised_headers
         ),
-        generalised_headers
+        generalised_headers,
+        sensitive_attr=None
     )
 
     assert t == expected
@@ -60,7 +63,8 @@ def test_within_bounds_after_insert():
             data=np.array([25, 27]),
             index=headers
         ),
-        headers
+        headers,
+        sensitive_attr=None
     )
 
     c = Cluster(headers)
@@ -76,7 +80,8 @@ def test_within_bounds():
             data=np.array([25, 27]),
             index=headers
         ),
-        headers
+        headers,
+        sensitive_attr=None
     )
 
     c = Cluster(headers)
@@ -95,7 +100,8 @@ def test_out_of_bounds():
             data=np.array([25, 27]),
             index=headers
         ),
-        headers
+        headers,
+        sensitive_attr=None
     )
 
     c = Cluster(headers)
@@ -114,7 +120,8 @@ def test_no_cluster_intersection():
             data=np.array([25, 27]),
             index=headers
         ),
-        headers
+        headers,
+        sensitive_attr=None
     )
 
     c1 = Cluster(headers)
