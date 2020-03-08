@@ -4,22 +4,22 @@ import numpy as np
 from typing import List, Dict
 
 """
-This module will contain methods useful for ML 
+This module will contain methods useful for ML
 stuff in CASTLEGUARD.
-An example of a method which will be in this 
-module is one to take a Series object and turns 
-it into a dataframe. Within the series object, 
-if any parts have been generalised, the min and 
-max will be averaged and that result will be used 
+An example of a method which will be in this
+module is one to take a Series object and turns
+it into a dataframe. Within the series object,
+if any parts have been generalised, the min and
+max will be averaged and that result will be used
 instead.
 """
 
 def average_series(series_obj: pd.Series) -> pd.Series:
 	"""
-	For the object, inspect its keys for 
-	min/max entries and add them to a set. 
-	For each item in that set, average the 
-	min/max entries and return a dataframe 
+	For the object, inspect its keys for
+	min/max entries and add them to a set.
+	For each item in that set, average the
+	min/max entries and return a dataframe
 	row with this information.
 	"""
 	labels = series_obj.keys()
@@ -37,7 +37,7 @@ def average_series(series_obj: pd.Series) -> pd.Series:
 				axes.append(m.group(0))
 				del values[m.group(0)]
 			elif m.group(0) in values:
-				values[m.group(0)].append(series_obj.get(key)) 
+				values[m.group(0)].append(series_obj.get(key))
 			else:
 				values[m.group(0)] = [series_obj.get(key)]
 		else:
@@ -47,13 +47,13 @@ def average_series(series_obj: pd.Series) -> pd.Series:
 
 def average_group(group: List[pd.Series]) -> pd.DataFrame:
 	"""
-	Go through the list of SERIES object in the 
-	group. For each SERIES object, check the keys 
-	for min/max entries. If there is one, add it 
-	to the set of keys with a min/max entry. Then 
-	go over these entries and average each min/max 
-	and create a dataframe with all the averaged 
-	data in it and return it. 
+	Go through the list of SERIES object in the
+	group. For each SERIES object, check the keys
+	for min/max entries. If there is one, add it
+	to the set of keys with a min/max entry. Then
+	go over these entries and average each min/max
+	and create a dataframe with all the averaged
+	data in it and return it.
 	"""
 	dataframes = []
 	for s in group:
@@ -65,7 +65,6 @@ def average_group(group: List[pd.Series]) -> pd.DataFrame:
 	return whole
 
 def process(data: pd.DataFrame, category: Dict) -> pd.DataFrame :
-	print("Process Data")
 	data_keys = list(data.keys())
 	cat_keys = list(category.keys())
 	series_array = []

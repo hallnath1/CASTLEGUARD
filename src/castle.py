@@ -94,7 +94,6 @@ class CASTLE():
         # Update the global range values
         item = Item(data=data, headers=self.headers, sensitive_attr=self.sensitive_attr)
         self.update_global_ranges(item)
-
         cluster = self.best_selection(item)
 
         if not cluster:
@@ -111,7 +110,7 @@ class CASTLE():
             t_prime = self.global_tuples[0]
             # print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
-
+        
         self.update_tau()
 
     def output_cluster(self, c: Cluster):
@@ -124,7 +123,6 @@ class CASTLE():
         # Get the number of unique PIDs in the cluster
         unique_pids = len(set(t['pid'] for t in c.contents))
         sc = [c] if unique_pids < 2 * self.k and len(c.diversity) < self.l else self.split_l(c)
-
         for cluster in sc:
             for t in cluster.contents:
                 [generalised, original_tuple] = cluster.generalise(t)
@@ -252,8 +250,7 @@ class CASTLE():
 
         total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
         total_diversity = all(len(cluster.diversity) > self.l for cluster in self.big_gamma)
-
-        if total_cluster_size < self.k or not total_diversity:
+        if total_cluster_size < self.k and not total_diversity:
             return self.suppress_tuple(t)
 
         mc = self.merge_clusters(t.parent)

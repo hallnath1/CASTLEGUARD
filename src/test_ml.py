@@ -29,7 +29,7 @@ def accuracy(pred, actual):
 			true+=1
 		else:
 			false+=1
-	
+
 	return true/(true+false)
 
 def validation(features, labels, nb):
@@ -50,17 +50,16 @@ def handler(value: pd.Series):
 	insert_time_list.append(counter)
 	sarray.append(value.data)
 
-def gen_test1(args):
+def ml_test1(args):
 	frame = pd.read_csv(csv_gen.generate(filename,
-										rows=rows, 
-										headers=["Age","GPA", "HoursPW", "EducationLvl", "Employed"], 
+										rows=rows,
+										headers=["Age","GPA", "HoursPW", "EducationLvl", "Employed"],
 										datatypes=["int120","float5", "int56", "int6", "int2"]))
-	
-	headers = list(frame.columns.values)
-	params = Parameters(args.k, args.delta, args.beta, args.mu)
-	
-	stream = CASTLE(handler, headers, params)
-	
+	headers = ["Age","GPA", "HoursPW", "EducationLvl"]
+	params = Parameters(args.k, args.delta, args.beta, args.mu, args.l)
+	sensitive_attr = "Employed"
+	stream = CASTLE(handler, headers, sensitive_attr, params)
+
 	for(_, row) in frame.iterrows():
 		global counter
 		counter+=1
@@ -69,29 +68,60 @@ def gen_test1(args):
 	# A function which tells us if there are any tuples which haven't been outputted yet
 
 	avg = mlu.average_group(sarray)
-	assert type(avg) is pd.DataFrame 
+	assert type(avg) is pd.DataFrame
 	avg_features = avg[["Age", "HoursPW", "EducationLvl", "GPA"]]
 	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
 	for i in range(1, 10):
 		print("Avg for k = "+str(i)+": "+str(validation(avg_norm, avg["Employed"], i)))
 	os.remove("{}.csv".format(filename))
 
-def gen_test2(args):
+def ml_test2(args):
 	frame = pd.read_csv(csv_gen.generate(filename,
-									rows=10, 
-									headers=["Age","GPA", "HoursPW", "Education", "Employed"], 
+									rows=10,
+									headers=["Age","GPA", "HoursPW", "Education", "Employed"],
 									datatypes=["int120","float5", "int56", "edu", "int2"],
 									categorical={"edu":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}))
 	cat = {"Education":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}
-	print(frame)
-	print(mlu.process(frame, cat))
+
+	mlu.process(frame, cat)
 	os.remove("{}.csv".format(filename))
 
+def ml_test3(args):
+	frame = pd.read_csv("diabetes.csv")
+	headers=["pregnancies","glucose","bloodPressure","skinThickness","insulin","bmi","diabetesPedigree","age"]
+	sensitive_attr = "outcome"
+
+	frame_norm = (frame[headers] - frame[headers].mean()) / (frame[headers].std())
+	total =0
+	for i in range(1, 10):
+		valid = validation(frame_norm, frame[sensitive_attr], i)
+		# print("k = "+str(i)+": "+str(valid))
+		total += valid
+	print("Average Accuracy for Regular Data: {}".format(total/9))
+	
+	frame["pid"] = frame.index
+	params = Parameters(args.k, args.delta, args.beta, args.mu, args.l)
+	stream = CASTLE(handler, headers, sensitive_attr, params)
+
+	for(_, row) in frame.iterrows():
+		global counter
+		counter+=1
+		stream.insert(row)
+	
+	avg = mlu.average_group(sarray)
+	avg_features = avg[headers]
+	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
+	total = 0
+	for i in range(1, 10):
+		valid = validation(avg_norm, avg[sensitive_attr], i)
+		# print("Avg for k = "+str(i)+": "+str(valid))
+		total+=valid
+	print("Average Accuracy for CASTLE: {}".format(total/9))
 
 def test_process():
 	frame = pd.read_csv(csv_gen.generate(filename,
-									rows=1, 
-									headers=["Age","GPA", "HoursPW", "Education", "Employed"], 
+									rows=1,
+									headers=["Age","GPA", "HoursPW", "Education", "Employed"],
 									datatypes=["int120","float5", "int56", "edu", "int2"],
 									categorical={"edu":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}))
 	cat = {"Education":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}
@@ -103,12 +133,13 @@ def test_process():
 			assert cat[key].index(frame_s[key]) == processed[key]
 		else:
 			assert frame_s[key] == processed[key]
-	
+
 
 
 
 if __name__=="__main__":
 	args = app.parse_args()
-	gen_test1(args)
-	gen_test2(args)
-	
+	ml_test1(args)
+	ml_test2(args)
+	ml_test3(args)
+
