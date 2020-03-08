@@ -109,7 +109,7 @@ class CASTLE():
         if len(self.global_tuples) > self.delta:
             # Get the next tuple to be output
             t_prime = self.global_tuples[0]
-            print("Attempting to output: \n{}".format(t_prime))
+            # print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
 
         self.update_tau()
@@ -128,7 +128,6 @@ class CASTLE():
         for cluster in sc:
             for t in cluster.contents:
                 [generalised, original_tuple] = cluster.generalise(t)
-                print("OUTPUT")
                 self.suppress_tuple(original_tuple)
                 self.callback(generalised)
 

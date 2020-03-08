@@ -47,7 +47,11 @@ def gen_rand_number(dt):
         return "0"
 
 
-def generate(name=None,rows=50, headers=["Name","Age", "Education", "GPA"], datatypes=["name", "int100", "edu", "float5"]):
+def generate(name=None,
+            rows=50, 
+            headers=["Name","Age", "Education", "GPA"], 
+            datatypes=["name", "int100", "edu", "float5"], 
+            categorical={"edu":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}):
     """
     Function which is used to create random CSV to be used for testing of 
     data analysis functionality. The headers for the CSV are defined in 
@@ -60,7 +64,6 @@ def generate(name=None,rows=50, headers=["Name","Age", "Education", "GPA"], data
         print("Need a datatype for each header")
         return
     fake = Faker()
-    edu_levels = ["Primary", "Secondary", "Bachelors", "Masters", "PhD"]
     f, filename = create_file(name)
     headers.insert(0,"pid")
     f.write(','.join(headers)+"\n")
@@ -70,15 +73,24 @@ def generate(name=None,rows=50, headers=["Name","Age", "Education", "GPA"], data
         for i in range(0, len(datatypes)):
             if datatypes[i] == "name":
                 row.append(fake.name())
-            elif datatypes[i] == "edu":
-                row.append(edu_levels[(random.randrange(100)%6)-1])
             elif re.search("(int|float)", datatypes[i]):
                 row.append(str(gen_rand_number(datatypes[i])))
+            else:
+                try:
+                    category = categorical[datatypes[i]]
+                    row.append(category[(random.randrange(100)%(len(category)+1))-1])
+                except:
+                    print("No Defined Category")
 
         f.write(','. join(row)+"\n")
     return filename
 
-def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education", "GPA"], datatypes=["name", "int100", "edu", "float5"], generalise=["Age", "GPA"]):
+def generate_output_data(name=None, 
+                        rows=50, 
+                        headers=["Name", "Age", "Education", "GPA"], 
+                        datatypes=["name", "int100", "edu", "float5"], 
+                        generalise=["Age", "GPA"],
+                        categorical={"edu":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}):
     """
     Function which is used to create random CSV to be used for testing of 
     data analysis functionality. The headers for the CSV are defined in 
@@ -93,7 +105,6 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
         print("Need a datatype for each header")
         return
     fake = Faker()
-    edu_levels = ["Primary", "Secondary", "Bachelors", "Masters", "PhD"]
     f, filename = create_file(name)
     temp = []
     temp.append("pid")
@@ -102,7 +113,7 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
         # If it is, create a min and a max 
         if headers[i] in generalise:
             temp.append("min"+headers[i])
-            temp.append("med"+headers[i])
+            temp.append("spc"+headers[i])
             temp.append("max"+headers[i])
         else:
             temp.append(headers[i])
@@ -113,8 +124,6 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
         for i in range(0, len(headers)):
             if datatypes[i] == "name":
                 row.append(fake.name())
-            elif datatypes[i] == "edu":
-                row.append(edu_levels[(random.randrange(100)%6)-1])
             elif re.search("(int|float)", datatypes[i]):
                 max = gen_rand_number(datatypes[i])
                 if headers[i] in generalise:
@@ -136,5 +145,11 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
                     row.append(str(min))
                     row.append(str(med))
                 row.append(str(max))
+            else:
+                try:
+                    category = categorical[datatypes[i]]
+                    row.append(category[(random.randrange(100)%(len(category)+1))-1])
+                except:
+                    print("No Defined Category")
         f.write(','. join(row)+"\n")        
     return filename
