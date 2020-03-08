@@ -77,3 +77,27 @@ def test_out_of_bounds():
     }
 
     assert not c.within_bounds(t)
+
+def test_no_cluster_intersection():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c1 = Cluster(headers)
+    c2 = Cluster(headers)
+
+    c1.insert(t)
+
+    # Ensure only c1 contains an item
+    assert len(c1) == 1 and len(c2) == 0
+
+    c2.insert(t)
+
+    # Ensure t was removed from c1 after insertion
+    assert len(c1) == 0 and len(c2) == 1

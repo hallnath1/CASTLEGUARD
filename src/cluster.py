@@ -28,6 +28,13 @@ class Cluster():
 
         """
         self.contents.append(element)
+
+        # Check whether the item is already in a cluster
+        if element.parent:
+            # If it is, remove it so that we do not reach an invalid state
+            element.parent.remove(element)
+
+        # Update the parent of the item to be this cluster
         element.parent = self
 
         for k, v in self.ranges.items():
