@@ -7,22 +7,50 @@ from range import Range
 
 def test_generalise():
 
-    frame = pd.read_csv("data.csv")
+    headers = ["Age", "Salary"]
 
-    t = Item(frame.iloc[0], headers=["PickupLocationID", "TripDistance"])
-    a = Item(frame.iloc[1], headers=["PickupLocationID", "TripDistance"])
-    b = Item(frame.iloc[2], headers=["PickupLocationID", "TripDistance"])
-    c = Cluster(headers=["PickupLocationID", "TripDistance"])
-    c.insert(t)
+    a = Item(
+        pd.Series(
+            data=np.array([25, 30]),
+            index=headers
+        ),
+        headers
+    )
+
+    b = Item(
+        pd.Series(
+            data=np.array([22, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+
     c.insert(a)
     c.insert(b)
 
-    t, orig = c.generalise(t)
-    d = {"pid":1, "minPickupLocationID":49, "maxPickupLocationID":264, "minTripDistance":.00, "maxTripDistance":0.86}
-    df = pd.Series(data=d)
-    test = Item(df ,headers=["minPickupLocationID", "maxPickupLocationID", "minTripDistance", "maxTripDistance"])
+    np.random.seed(42)
+    t = c.generalise(a)[0]
 
-    assert t == test
+    generalised_headers = [
+        "minAge", "spcAge", "maxAge",
+        "minSalary", "spcSalary", "maxSalary"
+    ]
+
+    expected = Item(
+        pd.Series(
+            data=np.array([22, 25, 25, 27, 27, 30]),
+            index=generalised_headers
+        ),
+        generalised_headers
+    )
+
+    assert t == expected
+
+    # We should get the same values a second time
+    t = c.generalise(b)[0]
+    assert t == expected
 
 def test_within_bounds_after_insert():
     headers = ["Age", "Salary"]
