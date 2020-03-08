@@ -15,7 +15,6 @@ def plot_average_loss_1D(avg_loss, x_axis, x_label):
     plt.show()
 
 def plot_average_loss_2D(avg_loss, x_axis, x_label, y_axis, y_label):
-    fig = plt.figure()
     ax = plt.axes(projection='3d')
     ax.plot_surface(x_axis, y_axis, avg_loss, rstride=1, cstride=1, cmap='winter', edgecolor='none')
     ax.set_xlabel(x_label)
@@ -74,17 +73,18 @@ def test_k(file_name, k_list):
     plot_average_loss_1D(avg_loss_list, k_list, "k")
 
 def test_beta_mu(file_name, beta_list, mu_list):
-    frame = pd.read_csv(file_name)
-    headers = list(frame.columns.values)
+    frame = pd.read_csv(file_name).sample(10000)
 
-    info_Loss = []
+    headers = ["PickupLocationID", "TripDistance"]
+
+    info_loss = []
 
     for mu in mu_list:
 
         avg_loss_list = []
 
         for beta in beta_list:
-            stream = CASTLE(handler, headers,Parameters(5, 10, beta, mu))
+            stream = CASTLE(handler, headers,Parameters(100, 10000, beta, mu))
          
             for (_, row) in frame.iterrows():
                 stream.insert(row)
@@ -96,9 +96,9 @@ def test_beta_mu(file_name, beta_list, mu_list):
                 cum_loss += cluster.information_loss(stream.global_ranges)
             avg_loss = cum_loss / len(clusters)
             avg_loss_list.append(avg_loss)
-
+            print("END OF CASTLE\n\n\n\n\n\n\n")
         info_loss.append(np.array(avg_loss_list))
         
-    X, Y = np.meshgrid(betaList, muList)
-    plot_average_loss_2D(np.array(infoLoss2D), X, "Beta", Y, "Mu")
+    X, Y = np.meshgrid(beta_list, mu_list)
+    plot_average_loss_2D(np.array(info_loss), X, "Beta", Y, "Mu")
     

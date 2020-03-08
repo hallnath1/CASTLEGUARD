@@ -124,7 +124,7 @@ class CASTLE():
         for cluster in sc:
             for t in cluster.contents:
                 [generalised, original_tuple] = cluster.generalise(t)
-                print("OUTPUT")
+                #print("OUTPUT")
                 self.suppress_tuple(original_tuple)
                 self.callback(generalised)
 
@@ -172,10 +172,12 @@ class CASTLE():
 
         """
         # Remove the tuple from the global queue
-        self.global_tuples.remove(t)
+        if t in self.global_tuples:
+            self.global_tuples.remove(t)
         # Remove the tuple from its cluster
         containing_cluster = t.parent
-        containing_cluster.remove(t)
+        if t in containing_cluster:
+            containing_cluster.remove(t)
 
     def best_selection(self, t: Item) -> Optional[Cluster]:
         """Finds the best matching cluster for <element>
