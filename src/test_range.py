@@ -19,6 +19,12 @@ def test_range_information_loss():
 
     assert r / I == 0.25
 
+def test_range_divide_by_zero():
+    r = Range(42, 42)
+    I = Range(42, 42)
+
+    assert r / I == 0
+
 def test_within_range():
     r = Range(5, 10)
     assert r.within_bounds(7)
