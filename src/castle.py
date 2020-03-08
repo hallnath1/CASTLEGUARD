@@ -123,8 +123,8 @@ class CASTLE():
             for t in cluster.contents:
                 [generalised, original_tuple] = cluster.generalise(t)
                 print("OUTPUT")
+                self.suppress_tuple(original_tuple)
                 self.callback(generalised)
-                self.global_tuples.remove(original_tuple)
 
             # Calculate the information loss of the cluster
             info_loss = cluster.information_loss(self.global_ranges)
@@ -233,8 +233,8 @@ class CASTLE():
             # Pick a random cluster from the set and generalise, then output
             random_cluster = np.random.choice(KCset)
             generalised, original = random_cluster.generalise(t)
-            self.global_tuples.remove(original)
-            return self.callback(t)
+            self.suppress_tuple(original)
+            return self.callback(generalised)
 
         m = 0
 
