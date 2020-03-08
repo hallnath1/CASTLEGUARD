@@ -38,7 +38,25 @@ class Range():
         Returns: VInfoLoss with respect to other
 
         """
-        return (self.upper - self.lower) / (other.upper - other.lower)
+        ds = self.upper - self.lower
+        do = other.upper - other.lower
+
+        # Deal with division by 0
+        if ds == 0 and do == 0:
+            return 0
+
+        return ds / do
+
+    def within_bounds(self, value: float):
+        """Checks whether the value is within the bounds of the range.
+
+        Args:
+            value: The value to perform bounds checking for
+
+        Returns: Whether or not the value is in bounds
+
+        """
+        return self.lower <= value and value <= self.upper
 
     def __truediv__(self, other: Range):
         """Allows for the shorthand notation r1/r2 instead of r1.VInfoLoss(r2)

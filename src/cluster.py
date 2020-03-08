@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import numpy as np
 import pandas as pd
 
 from typing import Dict, List
@@ -20,6 +21,8 @@ class Cluster():
         for header in headers:
             self.ranges[header] = Range()
 
+        self.sample_values: Dict[str, float] = {}
+
     def insert(self, element: Item):
         """Inserts a tuple into the cluster
 
@@ -28,6 +31,13 @@ class Cluster():
 
         """
         self.contents.append(element)
+
+        # Check whether the item is already in a cluster
+        if element.parent:
+            # If it is, remove it so that we do not reach an invalid state
+            element.parent.remove(element)
+
+        # Update the parent of the item to be this cluster
         element.parent = self
 
         for k, v in self.ranges.items():
@@ -53,11 +63,23 @@ class Cluster():
 
         """
         gen_tuple = copy.deepcopy(t)
+
         for h, v in self.ranges.items():
             gen_tuple.data.loc['min' + h] = v.lower
+
+            # Pick a random person to use for this attribute
+            if not h in self.sample_values:
+                self.sample_values[h] = np.random.choice(self.contents)[h]
+
+            gen_tuple.data.loc['spc' + h] = self.sample_values[h]
+
             gen_tuple.data.loc['max' + h] = v.upper
+
+
             gen_tuple.headers.append('min' + h)
+            gen_tuple.headers.append('spc' + h)
             gen_tuple.headers.append('max' + h)
+
             gen_tuple.headers.remove(h)
             del gen_tuple.data[h]
 
@@ -154,6 +176,22 @@ class Cluster():
             loss += r / global_range
 
         return loss
+
+    def within_bounds(self, t: Item) -> bool:
+        """Checks whether a tuple is within all the ranges of the this
+        cluster, eg. would cause no information loss on being entered.
+
+        Args:
+            t: The tuple to perform bounds checking on
+
+        Returns: Whether or not the tuple is within the bounds of the cluster
+
+        """
+        for k, v in self.ranges.items():
+            if not v.within_bounds(t[k]):
+                return False
+
+        return True
 
     def __len__(self) -> int:
         """Calculates the length of this cluster

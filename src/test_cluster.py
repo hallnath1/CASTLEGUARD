@@ -1,22 +1,131 @@
+import numpy as np
+import pandas as pd
+
 from cluster import Cluster
 from item import Item
-import pandas as pd
+from range import Range
 
 def test_generalise():
 
-    frame = pd.read_csv("data.csv")
+    headers = ["Age", "Salary"]
 
-    t = Item(frame.iloc[0], headers=["PickupLocationID", "TripDistance"])
-    a = Item(frame.iloc[1], headers=["PickupLocationID", "TripDistance"])
-    b = Item(frame.iloc[2], headers=["PickupLocationID", "TripDistance"])
-    c = Cluster(headers=["PickupLocationID", "TripDistance"])
-    c.insert(t)
+    a = Item(
+        pd.Series(
+            data=np.array([25, 30]),
+            index=headers
+        ),
+        headers
+    )
+
+    b = Item(
+        pd.Series(
+            data=np.array([22, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+
     c.insert(a)
     c.insert(b)
 
-    t = c.generalise(t)
-    d = {"pid":1, "minPickupLocationID":49, "maxPickupLocationID":264, "minTripDistance":.00, "maxTripDistance":0.86}
-    df = pd.Series(data=d)
-    test = Item(df ,headers=["minPickupLocationID", "maxPickupLocationID", "minTripDistance", "maxTripDistance"])
+    np.random.seed(42)
+    t = c.generalise(a)[0]
 
-    assert t == test
+    generalised_headers = [
+        "minAge", "spcAge", "maxAge",
+        "minSalary", "spcSalary", "maxSalary"
+    ]
+
+    expected = Item(
+        pd.Series(
+            data=np.array([22, 25, 25, 27, 27, 30]),
+            index=generalised_headers
+        ),
+        generalised_headers
+    )
+
+    assert t == expected
+
+    # We should get the same values a second time
+    t = c.generalise(b)[0]
+    assert t == expected
+
+def test_within_bounds_after_insert():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+    c.insert(t)
+
+    assert c.within_bounds(t)
+
+def test_within_bounds():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+    c.ranges = {
+        "Age": Range(20, 25),
+        "Salary": Range(27, 32)
+    }
+
+    assert c.within_bounds(t)
+
+def test_out_of_bounds():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c = Cluster(headers)
+    c.ranges = {
+        "Age": Range(20, 24),
+        "Salary": Range(27, 32)
+    }
+
+    assert not c.within_bounds(t)
+
+def test_no_cluster_intersection():
+    headers = ["Age", "Salary"]
+
+    t = Item(
+        pd.Series(
+            data=np.array([25, 27]),
+            index=headers
+        ),
+        headers
+    )
+
+    c1 = Cluster(headers)
+    c2 = Cluster(headers)
+
+    c1.insert(t)
+
+    # Ensure only c1 contains an item
+    assert len(c1) == 1 and len(c2) == 0
+
+    c2.insert(t)
+
+    # Ensure t was removed from c1 after insertion
+    assert len(c1) == 0 and len(c2) == 1

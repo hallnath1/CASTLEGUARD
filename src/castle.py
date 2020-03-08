@@ -1,5 +1,6 @@
-import math, random
+import math
 
+import numpy as np
 import pandas as pd
 
 from typing import Any, Callable, Deque, Dict, List, Optional
@@ -116,13 +117,16 @@ class CASTLE():
             c: The cluster to output with generalisations
 
         """
-        sc = [c] if len(c) < 2 * self.k else self.split(c)
+        # Get the number of unique PIDs in the cluster
+        unique_pids = len(set(t['pid'] for t in c.contents))
+        sc = [c] if unique_pids < 2 * self.k else self.split(c)
 
         for cluster in sc:
             for t in cluster.contents:
                 [generalised, original_tuple] = cluster.generalise(t)
+                print("OUTPUT")
+                self.suppress_tuple(original_tuple)
                 self.callback(generalised)
-                self.global_tuples.remove(original_tuple)
 
             # Calculate the information loss of the cluster
             info_loss = cluster.information_loss(self.global_ranges)
@@ -152,7 +156,7 @@ class CASTLE():
         elif self.big_gamma:
             # Get 5 elements if we have them, otherwise just get all of them
             sample_size = min(len(self.big_gamma), 5)
-            chosen = random.sample(self.big_gamma, sample_size)
+            chosen = np.random.choice(self.big_gamma, size=sample_size)
 
             # Sum the information loss for each chosen cluster
             total_loss = sum(c.information_loss(self.global_ranges) for c in chosen)
@@ -205,11 +209,11 @@ class CASTLE():
 
         if not setCok:
             if self.beta <= len(self.big_gamma):
-                return random.choice(tuple(setCmin))
+                return np.random.choice(tuple(setCmin))
             else:
                 return None
         else:
-            return random.choice(tuple(setCok))
+            return np.random.choice(tuple(setCok))
 
         return None
 
@@ -224,14 +228,15 @@ class CASTLE():
             self.output_cluster(t.parent)
             return
 
-        # Get all the clusters that contain t
-        # TODO: This most likely needs to be 'contains', eg within bounds #
-        KCset = [cluster for cluster in self.big_omega if t in cluster]
+        # Get all the clusters that t could be within
+        KCset = [c for c in self.big_omega if c.within_bounds(t)]
 
         if KCset:
-            generalised = cluster.generalise(t)
-            self.callback(generalised)
-            return
+            # Pick a random cluster from the set and generalise, then output
+            random_cluster = np.random.choice(KCset)
+            generalised, original = random_cluster.generalise(t)
+            self.suppress_tuple(original)
+            return self.callback(generalised)
 
         m = 0
 
@@ -276,9 +281,9 @@ class CASTLE():
         # While k <= number of buckets
         while self.k <= len(buckets):
             # Pick a random tuple from a random bucket
-            pid = random.choice(list(buckets.keys()))
+            pid = np.random.choice(list(buckets.keys()))
             bucket = buckets[pid]
-            t = bucket.pop(random.randint(0, len(bucket) - 1))
+            t = bucket.pop(np.random.randint(0, len(bucket)))
 
             # Create a new subcluster over t
             cnew = Cluster(self.headers)
@@ -295,7 +300,7 @@ class CASTLE():
                     continue
 
                 # Pick a random tuple in the bucket
-                random_tuple = random.choice(value)
+                random_tuple = np.random.choice(value)
 
                 # Insert the tuple to the heap
                 heap.append(random_tuple)
@@ -319,7 +324,7 @@ class CASTLE():
             sc.append(cnew)
 
         for bi in buckets.values():
-            ti = random.choice(bi)
+            ti = np.random.choice(bi)
 
             # Find the nearest cluster in sc
             nearest = min(sc, key=lambda c: c.tuple_enlargement(ti, self.global_ranges))
@@ -342,9 +347,11 @@ class CASTLE():
         gamma_c = [cluster for cluster in self.big_gamma if cluster != c]
 
         while len(c) < self.k:
+            # Get the cluster with the lowest enlargement value
             lowest_enlargement_cluster = min(gamma_c, key=lambda cl: c.cluster_enlargement(cl, self.global_ranges))
+            items = [t for t in lowest_enlargement_cluster.contents]
 
-            for t in lowest_enlargement_cluster.contents:
+            for t in items:
                 c.insert(t)
 
             self.big_gamma.remove(lowest_enlargement_cluster)
