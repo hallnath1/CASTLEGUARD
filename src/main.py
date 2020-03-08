@@ -42,7 +42,7 @@ def main():
     np.random.seed(seed)
     print("USING RANDOM SEED: {}".format(seed))
 
-    frame = pd.read_csv(args.filename).sample(args.sample_size)
+    frame = pd.read_csv(args.filename).sample(20)
 
     headers = ["PickupLocationID", "TripDistance"]
     params = Parameters(args.k, args.delta, args.beta, args.mu)
