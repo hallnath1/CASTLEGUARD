@@ -63,7 +63,6 @@ def generate(name=None,rows=50, headers=["Name","Age", "Education", "GPA"], data
     edu_levels = ["Primary", "Secondary", "Bachelors", "Masters", "PhD"]
     f, filename = create_file(name)
     headers.insert(0,"pid")
-    pid = 1
     f.write(','.join(headers)+"\n")
 
     for pid in range(0, rows):
@@ -98,12 +97,12 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
     f, filename = create_file(name)
     temp = []
     temp.append("pid")
-    pid = 1
     for i in range(0, len(headers)):
         # In this loop, each header should be check if its in generalise
         # If it is, create a min and a max 
         if headers[i] in generalise:
             temp.append("min"+headers[i])
+            temp.append("med"+headers[i])
             temp.append("max"+headers[i])
         else:
             temp.append(headers[i])
@@ -120,17 +119,22 @@ def generate_output_data(name=None, rows=50, headers=["Name", "Age", "Education"
                 max = gen_rand_number(datatypes[i])
                 if headers[i] in generalise:
                     min = random.uniform(0, max)
+                    med = random.uniform(min, max)
                     if type(max) is int:
                         min = int(min)
+                        med = int(med)
                         while min == max:
                             if max == 0:
                                 max = 1
                             min = int(random.uniform(0, max))
+                            med = int(random.uniform(med, max))
                             
                     else:
                         while min == max:
                             min = random.uniform(0, max)
+                            med = random.uniform(min, max)
                     row.append(str(min))
+                    row.append(str(med))
                 row.append(str(max))
         f.write(','. join(row)+"\n")        
     return filename
