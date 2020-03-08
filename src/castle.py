@@ -120,7 +120,7 @@ class CASTLE():
             c: The cluster to output with generalisations
 
         """
-        sc = [c] if len(c) < 2 * self.k and len(c.diversity) < self.l else self.split(c)
+        sc = [c] if len(c) < 2 * self.k and len(c.diversity) < self.l else self.split_l(c)
 
         for cluster in sc:
             for t in cluster.contents:
@@ -403,7 +403,7 @@ class CASTLE():
                 for g in G:
                     c.insert(t)
                     C.remove(g)
-                    
+
             self.big_gamma.append(c)
 
         return sc
@@ -414,7 +414,7 @@ class CASTLE():
 
         # Insert all the tuples into the relevant buckets
         for t in C.contents:
-            if t.data.self.sensitive_attr not in buckets:
+            if t.data[self.sensitive_attr] not in buckets:
                 buckets[self.sensitive_attr] = []
 
             buckets[self.sensitive_attr].append(t)
