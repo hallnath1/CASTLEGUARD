@@ -1,5 +1,6 @@
-import math, random
+import math
 
+import numpy as np
 import pandas as pd
 
 from typing import Any, Callable, Deque, Dict, List, Optional
@@ -153,7 +154,7 @@ class CASTLE():
         elif self.big_gamma:
             # Get 5 elements if we have them, otherwise just get all of them
             sample_size = min(len(self.big_gamma), 5)
-            chosen = random.sample(self.big_gamma, sample_size)
+            chosen = np.random.choice(self.big_gamma, size=sample_size)
 
             # Sum the information loss for each chosen cluster
             total_loss = sum(c.information_loss(self.global_ranges) for c in chosen)
@@ -206,11 +207,11 @@ class CASTLE():
 
         if not setCok:
             if self.beta <= len(self.big_gamma):
-                return random.choice(tuple(setCmin))
+                return np.random.choice(tuple(setCmin))
             else:
                 return None
         else:
-            return random.choice(tuple(setCok))
+            return np.random.choice(tuple(setCok))
 
         return None
 
@@ -230,7 +231,7 @@ class CASTLE():
 
         if KCset:
             # Pick a random cluster from the set and generalise, then output
-            random_cluster = random.choice(KCset)
+            random_cluster = np.random.choice(KCset)
             generalised, original = random_cluster.generalise(t)
             self.global_tuples.remove(original)
             return self.callback(t)
@@ -278,9 +279,9 @@ class CASTLE():
         # While k <= number of buckets
         while self.k <= len(buckets):
             # Pick a random tuple from a random bucket
-            pid = random.choice(list(buckets.keys()))
+            pid = np.random.choice(list(buckets.keys()))
             bucket = buckets[pid]
-            t = bucket.pop(random.randint(0, len(bucket) - 1))
+            t = bucket.pop(np.random.randint(0, len(bucket)))
 
             # Create a new subcluster over t
             cnew = Cluster(self.headers)
@@ -297,7 +298,7 @@ class CASTLE():
                     continue
 
                 # Pick a random tuple in the bucket
-                random_tuple = random.choice(value)
+                random_tuple = np.random.choice(value)
 
                 # Insert the tuple to the heap
                 heap.append(random_tuple)
@@ -321,7 +322,7 @@ class CASTLE():
             sc.append(cnew)
 
         for bi in buckets.values():
-            ti = random.choice(bi)
+            ti = np.random.choice(bi)
 
             # Find the nearest cluster in sc
             nearest = min(sc, key=lambda c: c.tuple_enlargement(ti, self.global_ranges))
