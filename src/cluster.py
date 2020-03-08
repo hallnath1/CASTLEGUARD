@@ -183,7 +183,8 @@ class Cluster():
         return loss
     
     def distance(self, t: Item):
-        "TODO: can be updated to use global ranges"
+        # TODO: can be updated to use global ranges
+
         total_distance = 0
         for header, range in self.ranges.items():
             total_distance += abs(t[header] - (range.upper - range.lower))

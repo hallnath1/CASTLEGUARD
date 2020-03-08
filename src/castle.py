@@ -254,7 +254,7 @@ class CASTLE():
         total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
         total_diversity = all(len(cluster.diversity) > self.l for cluster in self.big_gamma)
 
-        if total_cluster_size < self.k and not total_diversity:
+        if total_cluster_size < self.k or not total_diversity:
             return self.suppress_tuple(t)
 
         mc = self.merge_clusters(t.parent)
@@ -360,7 +360,6 @@ class CASTLE():
 
         # While length of buckets greater than l and more than k tuples
         while len(buckets) >= self.l and sum([len(b) for b in buckets.values()]) >= self.k:
-
             # Pick a random tuple from a random bucket
             pid = np.random.choice(list(buckets.keys()))
             bucket = buckets[pid]
@@ -372,7 +371,6 @@ class CASTLE():
 
             # Delete t from b
             del buckets[pid]
-
 
             for bucket in buckets.values():
 
@@ -411,12 +409,12 @@ class CASTLE():
 
         return sc
 
-    def generate_buckets(self, C: Cluster):
+    def generate_buckets(self, c: Cluster):
         # Group everyone by sensitive attribute
         buckets: Dict[Any, List[Item]] = {}
 
         # Insert all the tuples into the relevant buckets
-        for t in C.contents:
+        for t in c.contents:
             if t.data[self.sensitive_attr] not in buckets:
                 buckets[self.sensitive_attr] = []
 
