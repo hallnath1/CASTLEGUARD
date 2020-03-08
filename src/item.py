@@ -6,7 +6,7 @@ import pandas as pd
 from typing import Any, List
 
 class Item:
-    def __init__(self, data: pd.Series, headers: List[str]):
+    def __init__(self, data: pd.Series, headers: List[str], sensitive_attr: str):
         """Initialises an Item object
 
         Args:
@@ -16,6 +16,7 @@ class Item:
         """
         self.data: pd.Series = data
         self.headers: List[str] = headers
+        self.sensitive_attr: str = data[sensitive_attr] if sensitive_attr else None
         self.parent = None
 
     def __getitem__(self, key: str) -> Any:
