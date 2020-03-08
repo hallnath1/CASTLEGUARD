@@ -117,7 +117,9 @@ class CASTLE():
             c: The cluster to output with generalisations
 
         """
-        sc = [c] if len(c) < 2 * self.k else self.split(c)
+        # Get the number of unique PIDs in the cluster
+        unique_pids = len(set(t['pid'] for t in c.contents))
+        sc = [c] if unique_pids < 2 * self.k else self.split(c)
 
         for cluster in sc:
             for t in cluster.contents:
