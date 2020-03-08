@@ -121,13 +121,9 @@ class CASTLE():
             c: The cluster to output with generalisations
 
         """
-<<<<<<< HEAD
         # Get the number of unique PIDs in the cluster
         unique_pids = len(set(t['pid'] for t in c.contents))
         sc = [c] if unique_pids < 2 * self.k and len(c.diversity) < self.l else self.split_l(c)
-=======
-        sc = [c] if len(c) < 2 * self.k and len(c.diversity) < self.l else self.split_l(c)
->>>>>>> 612409b... use split_l function
 
         for cluster in sc:
             for t in cluster.contents:
@@ -257,7 +253,6 @@ class CASTLE():
 
         total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
         total_diversity = all(len(cluster.diversity) > self.l for cluster in self.big_gamma)
-
 
         if total_cluster_size < self.k and not total_diversity:
             return self.suppress_tuple(t)
