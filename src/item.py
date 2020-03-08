@@ -16,7 +16,7 @@ class Item:
         """
         self.data: pd.Series = data
         self.headers: List[str] = headers
-        self.sensitive_attr: str = data[sensitive_attr]
+        self.sensitive_attr: str = data[sensitive_attr] if sensitive_attr else None
         self.parent = None
 
     def __getitem__(self, key: str) -> Any:
