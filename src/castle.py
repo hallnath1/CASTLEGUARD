@@ -357,7 +357,7 @@ class CASTLE():
 
         # if number of buckets is less than l cannot split
         if len(buckets) < self.l:
-            return C
+            return {C}
 
         # While length of buckets greater than l and more than k tuples
         while len(buckets) >= self.l and sum([len(b) for b in buckets.values()]) >= self.k:
@@ -391,7 +391,6 @@ class CASTLE():
                     del bucket
 
             sc.append(cnew)
-            self.big_gamma.append(cnew)
 
         # For all remaining tuples in this cluster add them to the nearest cluster
         for bucket in buckets.values():
@@ -408,6 +407,8 @@ class CASTLE():
                 for g in G:
                     c.insert(t)
                     C.remove(g)
+                    
+            self.big_gamma.append(c)
 
         return sc
 
