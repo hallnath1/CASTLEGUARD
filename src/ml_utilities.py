@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 import numpy as np
+from typing import List, Dict
 
 """
 This module will contain methods useful for ML 
@@ -13,7 +14,7 @@ max will be averaged and that result will be used
 instead.
 """
 
-def average_series(series_obj):
+def average_series(series_obj: pd.Series) -> pd.Series:
 	"""
 	For the object, inspect its keys for 
 	min/max entries and add them to a set. 
@@ -26,7 +27,7 @@ def average_series(series_obj):
 	axes = []
 	values = {}
 	for key in labels:
-		m = re.search("((?<=min)|(?<=med)|(?<=max))[A-Za-z]*",key)
+		m = re.search("((?<=min)|(?<=spc)|(?<=max))[A-Za-z]*",key)
 		if m and m.group(0):
 			if m.group(0) in values and len(values[m.group(0)]) == 2:
 				total = (sum(values[m.group(0)]) + series_obj.get(key))/3
@@ -44,7 +45,7 @@ def average_series(series_obj):
 			axes.append(key)
 	return pd.Series(data, axes)
 
-def average_group(group):
+def average_group(group: List[pd.Series]) -> pd.DataFrame:
 	"""
 	Go through the list of SERIES object in the 
 	group. For each SERIES object, check the keys 
@@ -62,3 +63,19 @@ def average_group(group):
 
 	whole = pd.concat(dataframes, ignore_index=True)
 	return whole
+
+def process(data: pd.DataFrame, category: Dict) -> pd.DataFrame :
+	print("Process Data")
+	data_keys = list(data.keys())
+	cat_keys = list(category.keys())
+	series_array = []
+	for(_, row) in data.iterrows():
+		values = []
+		for cat in data_keys:
+			if cat in cat_keys:
+				values.append(category[cat].index(row[cat]))
+			else:
+				values.append(row[cat])
+		s_val = pd.Series(values, data_keys)
+		series_array.append(s_val.to_frame().transpose())
+	return pd.concat(series_array, ignore_index=True)

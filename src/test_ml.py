@@ -1,10 +1,12 @@
 import pandas as pd
 from castle import CASTLE
+from castle import Parameters
 import csv_gen
 import ml_utilities as mlu
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import KFold
 import os
+import app
 
 insert_time_list = []
 counter = 0
@@ -44,33 +46,28 @@ def validation(features, labels, nb):
 	return sum(pred_val) / len(pred_val)
 
 def handler(value: pd.Series):
-	print("RECIEVED VALUE: {}".format(value))
+	# print("RECIEVED VALUE: {}".format(value))
 	insert_time_list.append(counter)
-	sarray.append(value)
+	sarray.append(value.data)
 
-if __name__=="__main__":
-
+def gen_test1(args):
+	frame = pd.read_csv(csv_gen.generate(filename,
+										rows=rows, 
+										headers=["Age","GPA", "HoursPW", "EducationLvl", "Employed"], 
+										datatypes=["int120","float5", "int56", "int6", "int2"]))
 	
-	# frame = pd.read_csv(args.filename)
+	headers = list(frame.columns.values)
+	params = Parameters(args.k, args.delta, args.beta, args.mu)
 	
-	# headers = list(frame.columns.values)
+	stream = CASTLE(handler, headers, params)
 	
-	# stream = CASTLE(handler, headers, args.k, args.delta, args.beta)
-	
-	# for(_, row) in frame.iterrows():
-	#   counter+=1
-	# 	stream.insert(row)
+	for(_, row) in frame.iterrows():
+		global counter
+		counter+=1
+		stream.insert(row)
 
 	# A function which tells us if there are any tuples which haven't been outputted yet
 
-	frame = pd.read_csv(csv_gen.generate_output_data(filename,
-													rows=rows, 
-													headers=["Age","GPA", "HoursPW", "EducationLvl", "Employed"], 
-													datatypes=["int120","float5", "int56", "int6", "int2"], 
-													generalise=["Age","GPA", "HoursPW", "EducationLvl"]))
-	for i in range(0, rows):
-		row = frame.iloc[i]
-		sarray.append(row)
 	avg = mlu.average_group(sarray)
 	assert type(avg) is pd.DataFrame 
 	avg_features = avg[["Age", "HoursPW", "EducationLvl", "GPA"]]
@@ -78,3 +75,40 @@ if __name__=="__main__":
 	for i in range(1, 10):
 		print("Avg for k = "+str(i)+": "+str(validation(avg_norm, avg["Employed"], i)))
 	os.remove("{}.csv".format(filename))
+
+def gen_test2(args):
+	frame = pd.read_csv(csv_gen.generate(filename,
+									rows=10, 
+									headers=["Age","GPA", "HoursPW", "Education", "Employed"], 
+									datatypes=["int120","float5", "int56", "edu", "int2"],
+									categorical={"edu":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}))
+	cat = {"Education":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}
+	print(frame)
+	print(mlu.process(frame, cat))
+	os.remove("{}.csv".format(filename))
+
+
+def test_process():
+	frame = pd.read_csv(csv_gen.generate(filename,
+									rows=1, 
+									headers=["Age","GPA", "HoursPW", "Education", "Employed"], 
+									datatypes=["int120","float5", "int56", "edu", "int2"],
+									categorical={"edu":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}))
+	cat = {"Education":["PhD", "Masters", "Bachelors", "Secondary", "Primary"]}
+	keys = list(frame.keys())
+	processed = mlu.process(frame, cat).iloc[0]
+	frame_s = frame.iloc[0]
+	for key in keys:
+		if key in cat:
+			assert cat[key].index(frame_s[key]) == processed[key]
+		else:
+			assert frame_s[key] == processed[key]
+	
+
+
+
+if __name__=="__main__":
+	args = app.parse_args()
+	gen_test1(args)
+	gen_test2(args)
+	
