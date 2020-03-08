@@ -345,9 +345,11 @@ class CASTLE():
         gamma_c = [cluster for cluster in self.big_gamma if cluster != c]
 
         while len(c) < self.k:
+            # Get the cluster with the lowest enlargement value
             lowest_enlargement_cluster = min(gamma_c, key=lambda cl: c.cluster_enlargement(cl, self.global_ranges))
+            items = [t for t in lowest_enlargement_cluster.contents]
 
-            for t in lowest_enlargement_cluster.contents:
+            for t in items:
                 c.insert(t)
 
             self.big_gamma.remove(lowest_enlargement_cluster)
