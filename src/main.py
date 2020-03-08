@@ -46,7 +46,7 @@ def main():
 
     headers = ["PickupLocationID", "TripDistance"]
     params = Parameters(args.k, args.delta, args.beta, args.mu, args.l)
-    stream = CASTLE(handler, headers, params)
+    stream = CASTLE(handler, headers, "FareAmount", params)
 
     for (_, row) in frame.iterrows():
         stream.insert(row)
