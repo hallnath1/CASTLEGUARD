@@ -61,8 +61,7 @@ def average_group(group: List[pd.Series]) -> pd.DataFrame:
 		df = avg.to_frame().transpose()
 		dataframes.append(df)
 
-	whole = pd.concat(dataframes, ignore_index=True)
-	return whole
+	return pd.concat(dataframes, ignore_index=True, sort=True) 
 
 def process(data: pd.DataFrame, category: Dict) -> pd.DataFrame :
 	data_keys = list(data.keys())
