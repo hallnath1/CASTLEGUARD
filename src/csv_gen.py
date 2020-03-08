@@ -63,7 +63,6 @@ def generate(name=None,rows=50, headers=["Name","Age", "Education", "GPA"], data
     edu_levels = ["Primary", "Secondary", "Bachelors", "Masters", "PhD"]
     f, filename = create_file(name)
     headers.insert(0,"pid")
-    pid = 1
     f.write(','.join(headers)+"\n")
 
     for pid in range(0, rows):

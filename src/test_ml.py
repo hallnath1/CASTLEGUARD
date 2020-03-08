@@ -72,6 +72,7 @@ if __name__=="__main__":
 		row = frame.iloc[i]
 		sarray.append(row)
 	avg = mlu.average_group(sarray)
+	assert type(avg) is pd.DataFrame 
 	avg_features = avg[["Age", "HoursPW", "EducationLvl", "GPA"]]
 	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
 	for i in range(1, 10):
