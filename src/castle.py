@@ -248,15 +248,13 @@ class CASTLE():
         if m > len(self.big_gamma) / 2:
             return self.suppress_tuple(t)
 
+        total_tuples = sum([len(cluster) for cluster in self.big_gamma])
         diversity_values = set()
 
         for cluster in self.big_gamma:
             diversity_values.update(cluster.diversity)
 
-        total_diversity = self.l < len(diversity_values)
-        total_cluster_size = sum([len(cluster) for cluster in self.big_gamma])
-
-        if total_cluster_size < self.k or not total_diversity:
+        if total_tuples < self.k or len(diversity_values) < self.l:
             return self.suppress_tuple(t)
 
         mc = self.merge_clusters(t.parent)
