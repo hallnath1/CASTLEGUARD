@@ -42,10 +42,10 @@ def main():
     np.random.seed(seed)
     print("USING RANDOM SEED: {}".format(seed))
 
-    frame = pd.read_csv(args.filename).sample(20)
+    frame = pd.read_csv(args.filename).sample(args.sample_size)
 
     headers = ["PickupLocationID", "TripDistance"]
-    params = Parameters(args.k, args.delta, args.beta, args.mu, args.l)
+    params = Parameters(args.k, args.delta, args.beta, args.mu, args.l, args.phi, args.disable_dp, args.big_beta)
     stream = CASTLE(handler, headers, "FareAmount", params)
 
     for (_, row) in frame.iterrows():

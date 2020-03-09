@@ -18,6 +18,9 @@ class Parameters:
     beta: int
     mu: int
     l: int
+    phi: int
+    dp: bool
+    big_beta: float
 
 class CASTLE():
 
@@ -55,6 +58,11 @@ class CASTLE():
         # Required number of distinct sensitive attributes for a cluster to be complete
         self.l: int = params.l
 
+        self.dp = params.dp
+        if self.dp:
+            self.phi: int = params.phi
+            self.big_beta: float = params.big_beta
+
         # Set of non-ks anonymised clusters
         self.big_gamma: List[Cluster] = []
         # Set of ks anonymised clusters
@@ -62,6 +70,8 @@ class CASTLE():
 
         # Global ranges for the data stream S
         self.global_ranges: Dict[str, Range] = {}
+        # range for the sensitive attribute
+        self.sens_attr_range = Range()
         # Initialise them as empty ranges
         for header in self.headers:
             self.global_ranges[header] = Range()
@@ -81,6 +91,9 @@ class CASTLE():
             algorithm
 
         """
+        # Update the sensitive attribute range
+        self.sens_attr_range.update(data.data[self.sensitive_attr])
+
         for header in self.headers:
             self.global_ranges[header].update(data.data[header])
 
@@ -91,9 +104,18 @@ class CASTLE():
             data: The element of data to insert into the algorithm
 
         """
+        # Probabilty 1 - beta tuple is never inserted
+        if np.random.rand() > self.big_beta and self.dp:
+            return
+
         # Update the global range values
         item = Item(data=data, headers=self.headers, sensitive_attr=self.sensitive_attr)
+
         self.update_global_ranges(item)
+
+        if self.dp:
+            # Perturb tuple to satsify
+            self.fudge_tuple(item)
 
         cluster = self.best_selection(item)
 
@@ -113,6 +135,27 @@ class CASTLE():
             self.delay_constraint(t_prime)
 
         self.update_tau()
+
+    def fudge_tuple(self, tuple: Item):
+        """ Fudges a tuple based on laplace distribution
+
+        Args:
+            tuple: The tuple to be perturbed
+
+        """
+
+        for header in self.headers:
+            if self.global_ranges[header].lower is not None and self.global_ranges[header].upper is not None:
+                scale = max(self.global_ranges[header].difference(), 1) / self.phi
+                dist = np.round(np.random.laplace(scale=scale))
+                original_value = tuple.data[header]
+                tuple.fudge_tuple(value=original_value + dist, header=header)
+
+        if self.sens_attr_range.lower is not None and self.sens_attr_range.upper is not None:
+            scale = max(self.sens_attr_range.difference(), 1) / self.phi
+            dist = np.round(np.random.laplace(scale=scale))
+            original_value = tuple.data[self.sensitive_attr]
+            tuple.fudge_tuple(value=original_value + dist, header=self.sensitive_attr)
 
     def output_cluster(self, c: Cluster):
         """Outputs a cluster according to the algorithm
