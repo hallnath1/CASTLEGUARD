@@ -76,8 +76,29 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true"
     )
 
-    return parser
+    parser.add_argument(
+        "--disable-dp",
+        action="store_false"
+    )
 
+    parser.add_argument(
+        "--phi",
+        nargs="?",
+        default=10,
+        type=int,
+        help="phi value used to perturb tuples for k anonymity"
+    )
+
+    parser.add_argument(
+        "--big-beta",
+        nargs="?",
+        default=1,
+        type=float,
+        help="drop input tuples with probability 1 - beta"
+    )
+
+    return parser
+ 
 def parse_args() -> argparse.Namespace:
     """Parses the arguments specified on the command line
     Returns: The arguments that were specified on the command line and parsed
