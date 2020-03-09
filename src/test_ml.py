@@ -54,7 +54,7 @@ def handler(value: pd.Series):
 	insert_time_list.append(counter)
 	sarray.append(value.data)
 
-def test_ml1():
+def ml_test1():
 	print("test1")
 	args = app.parse_args()
 	global counter
@@ -85,7 +85,7 @@ def test_ml1():
 	print("Average Accuracy for CASTLE: {}".format(total/9))
 	os.remove("{}.csv".format(filename))
 
-def test_ml2():
+def ml_test2():
 	args = app.parse_args()
 	global sarray
 	global counter
@@ -119,7 +119,7 @@ def test_ml2():
 		total+=valid
 	print("Average Accuracy for CASTLE: {}".format(total/9))
 
-def test_ml3():
+def ml_test3():
 	args = app.parse_args()
 	global sarray
 	global counter
@@ -216,4 +216,6 @@ def test_process():
 	os.remove("{}.csv".format(filename))
 
 
-test_ml3()
+ml_test1()
+ml_test2()
+ml_test3()
