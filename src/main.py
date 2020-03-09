@@ -45,8 +45,10 @@ def main():
     frame = pd.read_csv(args.filename).sample(args.sample_size)
 
     headers = ["PickupLocationID", "TripDistance"]
+
     params = Parameters(args.k, args.delta, args.beta, args.mu, args.l, args.phi, args.disable_dp, args.big_beta)
-    stream = CASTLE(handler, headers, "FareAmount", params)
+    sensitive_attr = "FareAmount"
+    stream = CASTLE(handler, headers, sensitive_attr, params)
 
     for (_, row) in frame.iterrows():
         stream.insert(row)
