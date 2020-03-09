@@ -44,7 +44,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--l",
         nargs="?",
-        default=5,
+        default=1,
         type=int,
         help="The value of l to use"
     )
