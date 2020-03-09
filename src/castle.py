@@ -359,7 +359,7 @@ class CASTLE():
             # Pick a random tuple from a random bucket
             pid = np.random.choice(list(buckets.keys()))
             bucket = buckets[pid]
-            t = bucket.pop(np.random.randint(0, len(bucket) - 1))
+            t = bucket.pop(np.random.randint(0, len(bucket)))
 
             # Create a new subcluster over t
             cnew = Cluster(self.headers)
@@ -369,13 +369,18 @@ class CASTLE():
             del buckets[pid]
 
             for bucket in buckets.values():
-
                 # Sort the bucket by the enlargement value of that cluster
                 sorted_bucket = sorted(bucket, key=lambda t: C.tuple_enlargement(t, self.global_ranges))
-                tuples = self.k * (len(sorted_bucket) / sum([len(b) for b in buckets]))
+
+                # Count the number of tuples we have
+                total_tuples = sum([len(b) for b in buckets.values()])
+                # Calculate the number of tuples we should take
+                chosen_count = int(self.k * (len(sorted_bucket) / total_tuples))
+                # Get the subset of tuples
+                subset = sorted_bucket[:chosen_count]
 
                 # Insert the top Tj tuples in a new cluster
-                for t in sorted_bucket[:tuples]:
+                for t in subset:
                     cnew.insert(t)
                     bucket.remove(t)
 
@@ -395,26 +400,38 @@ class CASTLE():
 
         # This is in the pseudo code
         for c in sc:
-            for t in c:
-                G = {t_h for t_h in C if t_h.pid == t.pid}
+            for t in c.contents:
+                G = [t_h for t_h in C.contents if t_h['pid'] == t['pid']]
                 for g in G:
                     c.insert(t)
-                    C.remove(g)
 
             self.big_gamma.append(c)
 
         return sc
 
-    def generate_buckets(self, c: Cluster):
-        # Group everyone by sensitive attribute
+    def generate_buckets(self, c: Cluster) -> Dict[Any, List[Item]]:
+        """Groups all tuples in the cluster by their sensitive attribute
+
+        Args:
+            c: The cluster to generate the buckets for
+
+        Returns: A dictionary of attribute values to lists of items with those
+        values
+
+        """
         buckets: Dict[Any, List[Item]] = {}
 
         # Insert all the tuples into the relevant buckets
         for t in c.contents:
-            if t.data[self.sensitive_attr] not in buckets:
-                buckets[self.sensitive_attr] = []
+            # Get the value for the sensitive attribute for this tuple
+            sensitive_value = t[self.sensitive_attr]
 
-            buckets[self.sensitive_attr].append(t)
+            # If it isn't in our dictionary, make an empty list for it
+            if sensitive_value not in buckets:
+                buckets[sensitive_value] = []
+
+            # Insert the tuple into the cluster
+            buckets[sensitive_value].append(t)
 
         return buckets
 

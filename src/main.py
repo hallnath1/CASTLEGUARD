@@ -42,7 +42,7 @@ def main():
     np.random.seed(seed)
     print("USING RANDOM SEED: {}".format(seed))
 
-    frame = pd.read_csv(args.filename).sample(20)
+    frame = pd.read_csv(args.filename).sample(args.sample_size)
 
     headers = ["PickupLocationID", "TripDistance"]
     sensitive_attr = "FareAmount"
