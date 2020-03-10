@@ -19,19 +19,42 @@ def create_rectangle(rx: Range, ry: Range) -> patches.Rectangle:
     return patches.Rectangle((rx.lower, ry.lower), width, height, fill=False)
 
 def display_visualisation(stream: CASTLE):
-    fig, ax = plt.subplots(1)
+
+    cm = plt.cm.get_cmap('viridis')
+
+    ax = plt.subplot(1, 2, 1)
+    plt.title("CASTLE Ω Clusters and Output Tuples (Φ = {}, β = {})".format(stream.phi, stream.big_beta))
+    plt.xlabel("Pickup Location ID")
+    plt.ylabel("Trip Distance")
 
     for cluster in stream.big_gamma:
+        plid_range = cluster.ranges["PickupLocationID"]
+        distance_range = cluster.ranges["TripDistance"]
+        ax.add_patch(create_rectangle(plid_range, distance_range))
+
+    pickup_id = [t["PickupLocationID"] for t in stream.global_tuples]
+    distance = [t["TripDistance"] for t in stream.global_tuples]
+    fare_amount = [t.sensitive_attr for t in stream.global_tuples]
+    s = plt.scatter(pickup_id, distance, c=fare_amount, cmap=cm)
+    plt.colorbar(s)
+
+    ax = plt.subplot(1, 2, 2)
+    plt.title("CASTLE Ω Clusters and Output Tuples (Φ = {}, β = {})".format(stream.phi, stream.big_beta))
+    plt.xlabel("Pickup Location ID")
+    plt.ylabel("Trip Distance")
+
+
+    for cluster in stream.big_omega:
         plid_range = cluster.ranges["PickupLocationID"]
         distance_range = cluster.ranges["TripDistance"]
 
         ax.add_patch(create_rectangle(plid_range, distance_range))
 
-        for t in cluster.contents:
-            pickup_id = t["PickupLocationID"]
-            distance = t["TripDistance"]
-            plt.scatter(pickup_id, distance)
-
+    pickup_id = [t["PickupLocationID"] for t in stream.history]
+    distance = [t["TripDistance"] for t in stream.history]
+    fare_amount = [t.sensitive_attr for t in stream.history]
+    s = plt.scatter(pickup_id, distance, c=fare_amount, cmap=cm)
+    plt.colorbar(s)
     plt.show()
 
 def main():
