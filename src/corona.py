@@ -4,11 +4,13 @@ from castle import CASTLE
 from castle import Parameters
 import csv_gen
 import ml_utilities as mlu
-import keras
-from keras import backend
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropout
-from keras.optimizers import SGD
+try:
+    import keras
+    from keras import backend
+    from keras.models import Sequential
+    from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropout
+except:
+    print("Can't import")
 from sklearn.model_selection import train_test_split
 import os
 import app

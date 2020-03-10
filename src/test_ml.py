@@ -5,11 +5,13 @@ import csv_gen
 import ml_utilities as mlu
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import KFold
-import keras
-from keras import backend
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropout
-from keras.optimizers import SGD
+try:
+    import keras
+    from keras import backend
+    from keras.models import Sequential
+    from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropout
+except:
+    print("Can't import")
 import os
 import app
 
