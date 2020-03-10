@@ -56,6 +56,16 @@ class Parameters():
         """
         return value if value else default
 
+    def __str__(self):
+        """Returns a string representation of the object
+        Returns: TODO
+
+        """
+        return "Parameters(k={}, delta={}, beta={}, mu={}, l={}, phi={}, dp={}, big_beta={})".format(
+            self.k, self.delta, self.beta, self.mu,
+            self.l, self.phi, self.dp, self.big_beta
+        )
+
 class CASTLE():
 
     """An implementation of the CASTLE Algorithm designed by Jianneng Cao,
