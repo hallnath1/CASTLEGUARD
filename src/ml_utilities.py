@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 """
 This module will contain methods useful for ML
@@ -45,7 +45,7 @@ def average_series(series_obj: pd.Series) -> pd.Series:
 			axes.append(key)
 	return pd.Series(data, axes)
 
-def average_group(group: List[pd.Series]) -> pd.DataFrame:
+def average_group(group: List[pd.Series], datatypes:List[Tuple]=[]) -> pd.DataFrame:
 	"""
 	Go through the list of SERIES object in the
 	group. For each SERIES object, check the keys
@@ -61,7 +61,11 @@ def average_group(group: List[pd.Series]) -> pd.DataFrame:
 		df = avg.to_frame().transpose()
 		dataframes.append(df)
 
-	return pd.concat(dataframes, ignore_index=True, sort=True) 
+	whole = pd.concat(dataframes, ignore_index=True, sort=True) 
+	for t in datatypes:
+		whole[t[0]] = whole[t[0]].astype(t[1])
+	
+	return whole
 
 def process(data: pd.DataFrame, category: Dict) -> pd.DataFrame :
 	data_keys = list(data.keys())
