@@ -168,14 +168,21 @@ class CASTLE():
             c: The cluster to output with generalisations
 
         """
+
+        output_pids = set()
+        output_diversity = set()
+
         # Get the number of unique PIDs in the cluster
         unique_pids = len(set(t['pid'] for t in c.contents))
-        sc = [c] if unique_pids < 2 * self.k and len(c.diversity) < self.l else self.split_l(c)
+        sc = [c] if unique_pids < 2 * self.k or len(c.diversity) < self.l else self.split_l(c)
         for cluster in sc:
-            for t in cluster.contents:
+            contents = cluster.contents.copy()
+            for t in contents:
                 [generalised, original_tuple] = cluster.generalise(t)
-                self.suppress_tuple(original_tuple)
                 self.callback(generalised)
+                output_pids.add(t['pid'])
+                output_diversity.add(t[self.sensitive_attr])
+                self.suppress_tuple(original_tuple)
 
             # Calculate the information loss of the cluster
             info_loss = cluster.information_loss(self.global_ranges)
@@ -187,7 +194,9 @@ class CASTLE():
 
             self.update_tau()
 
-            # TODO: Update self.tau according to infoLoss(cluster) #
+        assert len(output_pids) >= self.k
+        assert len(output_diversity) >= self.l
+
             # TODO: Decide whether to delete cluster or move to self.big_omega #
             # TODO: This should probably happen #
             # self.big_gamma.remove(cluster)
@@ -454,7 +463,7 @@ class CASTLE():
         for c in sc:
             for t in c.contents:
                 G = [t_h for t_h in C.contents if t_h['pid'] == t['pid']]
-                for g in G:
+                for _ in G:
                     c.insert(t)
 
             self.big_gamma.append(c)
