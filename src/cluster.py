@@ -55,6 +55,9 @@ class Cluster():
         """
         self.contents.remove(element)
 
+        if not element.sensitive_attr in [e.sensitive_attr for e in self.contents]:
+            self.diversity.remove(element.sensitive_attr)
+
     def generalise(self, t: Item) -> pd.Series:
         """Generalises a tuple based on the ranges for this cluster
 
