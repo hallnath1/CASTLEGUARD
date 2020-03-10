@@ -45,7 +45,7 @@ def average_series(series_obj: pd.Series) -> pd.Series:
 			axes.append(key)
 	return pd.Series(data, axes)
 
-def average_group(group: List[pd.Series], datatypes:List[Tuple]) -> pd.DataFrame:
+def average_group(group: List[pd.Series], datatypes:List[Tuple]=[]) -> pd.DataFrame:
 	"""
 	Go through the list of SERIES object in the
 	group. For each SERIES object, check the keys

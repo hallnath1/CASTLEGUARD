@@ -218,6 +218,6 @@ def test_process():
 	os.remove("{}.csv".format(filename))
 
 
-ml_test1()
-ml_test2()
-ml_test3()
+# ml_test1()
+# ml_test2()
+# ml_test3()
