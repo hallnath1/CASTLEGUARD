@@ -154,7 +154,7 @@ class CASTLE():
 
         """
         # Probabilty 1 - beta tuple is never inserted
-        if np.random.rand() > self.big_beta and self.dp:
+        if self.dp and np.random.rand() > self.big_beta:
             return
 
         # Update the global range values
