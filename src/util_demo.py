@@ -6,10 +6,7 @@ if __name__ == "__main__":
     frame = pd.read_csv("data.csv")
     headers = list(frame.columns.values)
 
-    # Plot Beta Variation
-    util.test_beta("taxi.csv", [10])
-
     # Plot Beta and Mu Variation
-    util.test_beta_mu("taxi.csv", [10,20], [10,20])
-    
+    util.test_beta_mu("random_ldiverse.csv", [50, 100, 150, 200, 250], [50, 100, 150, 200, 250])
+
     # Graph x,y,z ...
