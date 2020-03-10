@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import math
 import pandas as pd
 
@@ -19,7 +17,7 @@ class Item:
         self.sensitive_attr: str = data[sensitive_attr] if sensitive_attr else None
         self.parent = None
 
-    def tuple_distance(self, t: Item) -> float:
+    def tuple_distance(self, t) -> float:
         """Calculates the distance between the two tuples
 
         Args:

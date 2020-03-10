@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Optional
 
 class Range():
@@ -29,7 +27,7 @@ class Range():
         self.lower = min(self.lower, value) if self.lower is not None else value
         self.upper = max(self.upper, value) if self.upper is not None else value
 
-    def VInfoLoss(self, other: Range) -> float:
+    def VInfoLoss(self, other) -> float:
         """Calculates VInfoLoss of other defined on Page 4 of the CASTLE paper
 
         Args:
@@ -69,7 +67,7 @@ class Range():
         """
         return abs(self.upper - self.lower)
 
-    def __truediv__(self, other: Range):
+    def __truediv__(self, other):
         """Allows for the shorthand notation r1/r2 instead of r1.VInfoLoss(r2)
 
         Args:
