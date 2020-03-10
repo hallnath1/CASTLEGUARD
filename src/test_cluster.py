@@ -7,27 +7,27 @@ from range import Range
 
 def test_generalise():
 
-    headers = ["Age", "Salary"]
+    headers = ["pid", "Age", "Salary"]
 
     a = Item(
         pd.Series(
-            data=np.array([25, 30]),
+            data=np.array([1, 25, 30]),
             index=headers
         ),
-        headers,
+        headers[1:],
         sensitive_attr=None
     )
 
     b = Item(
         pd.Series(
-            data=np.array([22, 27]),
+            data=np.array([1, 22, 27]),
             index=headers
         ),
-        headers,
+        headers[1:],
         sensitive_attr=None
     )
 
-    c = Cluster(headers)
+    c = Cluster(headers[1:])
 
     c.insert(a)
     c.insert(b)
