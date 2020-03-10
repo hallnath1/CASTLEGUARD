@@ -33,7 +33,14 @@ def test_beta(file_name, beta_list):
     avg_loss_list = []
 
     for beta in beta_list:
-        stream = CASTLE(handler, headers,Parameters(5, 10, beta, 10))
+        params = Parameters()
+
+        params.k = 5
+        params.delta = 10
+        params.beta = beta
+        params.mu = 10
+
+        stream = CASTLE(handler, headers, params)
      
         for (_, row) in frame.iterrows():
             stream.insert(row)
@@ -57,7 +64,14 @@ def test_k(file_name, k_list):
     avg_loss_list = []
 
     for k in k_list:
-        stream = CASTLE(handler, headers,Parameters(k, 10, 10, 10))
+        params = Parameters()
+
+        params.k = k
+        params.delta = 10
+        params.beta = 10
+        params.mu = 10
+
+        stream = CASTLE(handler, headers, params)
      
         for (_, row) in frame.iterrows():
             stream.insert(row)
@@ -84,7 +98,14 @@ def test_beta_mu(file_name, beta_list, mu_list):
         avg_loss_list = []
 
         for beta in beta_list:
-            stream = CASTLE(handler, headers,Parameters(5, 10, beta, mu))
+            params = Parameters()
+
+            params.k = 5
+            params.delta = 10
+            params.beta = beta
+            params.mu = mu
+
+            stream = CASTLE(handler, headers, params)
          
             for (_, row) in frame.iterrows():
                 stream.insert(row)

@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     frame = pd.read_csv(args.filename).sample(20)
 
-    params = Parameters(args.k, args.delta, args.beta, args.mu)
+    params = Parameters(args)
     jitter = jitter_wrapper(params, frame)
     print("JITTER: {}s".format(jitter))
     
