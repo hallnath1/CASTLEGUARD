@@ -4,4 +4,4 @@ pandas==1.0.0
 Faker==4.0.0
 scikit-learn==0.22.1
 Keras==2.3.1
-tensorflow==2.1.0 
+tensorflow==2.0.0rc0
