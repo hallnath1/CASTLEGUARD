@@ -54,7 +54,7 @@ class Parameters():
         Returns: Value if it exists, default otherwise
 
         """
-        return value if value else default
+        return value if value is not None else default
 
     def __str__(self):
         """Returns a string representation of the object
