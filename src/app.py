@@ -12,7 +12,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--k",
         nargs="?",
-        default=5,
         type=int,
         help="The value of k-anonymity to use"
     )
@@ -20,7 +19,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--delta",
         nargs="?",
-        default=10,
         type=int,
         help="The maximum number of tuples to store before outputting"
     )
@@ -28,7 +26,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--beta",
         nargs="?",
-        default=5,
         type=int,
         help="The maximum number of clusters to allow"
     )
@@ -36,7 +33,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--mu",
         nargs="?",
-        default=5,
         type=int,
         help="The number of most recent loss values to use for tau"
     )
@@ -44,7 +40,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--l",
         nargs="?",
-        default=1,
         type=int,
         help="The value of l to use"
     )
@@ -84,7 +79,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--phi",
         nargs="?",
-        default=10,
         type=int,
         help="phi value used to perturb tuples for k anonymity"
     )
@@ -92,7 +86,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--big-beta",
         nargs="?",
-        default=1,
         type=float,
         help="drop input tuples with probability 1 - beta"
     )

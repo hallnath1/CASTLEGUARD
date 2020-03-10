@@ -11,16 +11,50 @@ from cluster import Cluster
 from range import Range
 from item import Item
 
-@dataclass
-class Parameters:
-    k: int
-    delta: int
-    beta: int
-    mu: int
-    l: int
-    phi: int
-    dp: bool
-    big_beta: float
+class Parameters():
+
+    """The parameters for the CASTLE algorithm."""
+
+    def __init__(self, args=None):
+        """Initialises the parameters object
+
+        Kwargs:
+            args: The CLI arguments for the program
+
+        """
+        # Default parameter values
+        self.k = 5
+        self.delta = 10
+        self.beta = 5
+        self.mu = 5
+        self.l = 1
+        self.phi = 1
+        self.dp = True
+        self.big_beta = 1
+
+        # If we have some arguments, try and use those instead
+        if args:
+            self.k = self.optional(args.k, self.k)
+            self.delta = self.optional(args.delta, self.delta)
+            self.beta = self.optional(args.beta, self.beta)
+            self.mu = self.optional(args.mu, self.mu)
+            self.l = self.optional(args.l, self.l)
+            self.phi = self.optional(args.phi, self.phi)
+            self.dp = self.optional(args.disable_dp, self.dp)
+            self.big_beta = self.optional(args.big_beta, self.big_beta)
+            return
+
+    def optional(self, value, default):
+        """Returns a value if it exists, otherwise returns the default
+
+        Args:
+            value: The value to use
+            default: The default if value is None
+
+        Returns: Value if it exists, default otherwise
+
+        """
+        return value if value else default
 
 class CASTLE():
 

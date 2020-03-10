@@ -21,13 +21,15 @@ def generate_parameters(args):
     Returns: Randomly generate parameters
 
     """
-    return Parameters(
-        k=np.random.randint(1, 100),
-        delta=np.random.randint(1, 100),
-        beta=np.random.randint(1, 100),
-        mu=np.random.randint(1, 100),
-        l=np.random.randint(1, 10)
-    )
+    p = Parameters()
+
+    p.k = np.random.randint(1, 100),
+    p.delta = np.random.randint(1, 100),
+    p.beta = np.random.randint(1, 100),
+    p.mu = np.random.randint(1, 100),
+    p.l = np.random.randint(1, 10)
+
+    return p
 
 def main():
     # Parse the regular arguments for the program
