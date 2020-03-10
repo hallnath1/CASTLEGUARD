@@ -21,7 +21,7 @@ def generate_parameters(args):
     Returns: Randomly generate parameters
 
     """
-    p = Parameters()
+    p = Parameters(args)
 
     p.k = np.random.randint(1, 100)
     p.delta = np.random.randint(1, 100)
