@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import copy
 import numpy as np
 import pandas as pd
@@ -20,7 +18,7 @@ class Cluster():
 
         for header in headers:
             self.ranges[header] = Range()
-        
+
         self.diversity : Set[Any] = set()
 
         self.sample_values: Dict[str, float] = {}
@@ -56,6 +54,9 @@ class Cluster():
 
         """
         self.contents.remove(element)
+
+        if not element.sensitive_attr in [e.sensitive_attr for e in self.contents]:
+            self.diversity.remove(element.sensitive_attr)
 
     def generalise(self, t: Item) -> pd.Series:
         """Generalises a tuple based on the ranges for this cluster
@@ -105,7 +106,7 @@ class Cluster():
 
         return info_loss / len(self.ranges)
 
-    def cluster_enlargement(self, c: Cluster, global_ranges: Dict[str, Range]) -> float:
+    def cluster_enlargement(self, c, global_ranges: Dict[str, Range]) -> float:
         """Calculates the enlargement value for merging <c> into this cluster
 
         Args:
@@ -181,14 +182,14 @@ class Cluster():
             loss += r / global_range
 
         return loss
-    
+
     def distance(self, t: Item):
         # TODO: can be updated to use global ranges
 
         total_distance = 0
         for header, range in self.ranges.items():
             total_distance += abs(t[header] - (range.upper - range.lower))
-        
+
         return total_distance
 
     def within_bounds(self, t: Item) -> bool:
@@ -212,7 +213,7 @@ class Cluster():
         Returns: The number of tuples currently contained in the cluster
 
         """
-        return len(self.contents)
+        return len({t['pid'] for t in self.contents})
 
     def __contains__(self, t: Item) -> bool:
         """Checks whether this cluster contains t

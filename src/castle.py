@@ -191,19 +191,12 @@ class CASTLE():
             tuple: The tuple to be perturbed
 
         """
-
         for header in self.headers:
             if self.global_ranges[header].lower is not None and self.global_ranges[header].upper is not None:
                 scale = max(self.global_ranges[header].difference(), 1) / self.phi
                 dist = np.round(np.random.laplace(scale=scale))
                 original_value = t.data[header]
                 t.update_attribute(header, original_value + dist)
-
-        if self.sensitive_range.lower is not None and self.sensitive_range.upper is not None:
-            scale = max(self.sensitive_range.difference(), 1) / self.phi
-            dist = np.round(np.random.laplace(scale=scale))
-            original_value = t.data[self.sensitive_attr]
-            t.update_attribute(self.sensitive_attr, original_value + dist)
 
     def output_cluster(self, c: Cluster):
         """Outputs a cluster according to the algorithm
@@ -212,14 +205,18 @@ class CASTLE():
             c: The cluster to output with generalisations
 
         """
+        output_pids = set()
+        output_diversity = set()
+
         # Get the number of unique PIDs in the cluster
-        unique_pids = len(set(t['pid'] for t in c.contents))
-        sc = [c] if unique_pids < 2 * self.k and len(c.diversity) < self.l else self.split_l(c)
+        sc = self.split_l(c) if len(c.contents) >= 2 * self.k and len(c.diversity) >= self.l else [c]
         for cluster in sc:
-            for t in cluster.contents:
+            for t in [c for c in cluster.contents]:
                 [generalised, original_tuple] = cluster.generalise(t)
-                self.suppress_tuple(original_tuple)
                 self.callback(generalised)
+                output_pids.add(t['pid'])
+                output_diversity.add(t.sensitive_attr)
+                self.suppress_tuple(original_tuple)
 
             # Calculate the information loss of the cluster
             info_loss = cluster.information_loss(self.global_ranges)
@@ -231,14 +228,12 @@ class CASTLE():
 
             self.update_tau()
 
-            # TODO: Update self.tau according to infoLoss(cluster) #
-            # TODO: Decide whether to delete cluster or move to self.big_omega #
-            # TODO: This should probably happen #
-            # self.big_gamma.remove(cluster)
+            assert len(output_pids) >= self.k
+            assert len(output_diversity) >= self.l
+            assert len(cluster) == 0
 
-        # for t in cluster.contents:
-        #     print("FOR T")
-        #     self.callback(t)
+            self.big_omega.append(cluster)
+            self.big_gamma.remove(cluster)
 
     def update_tau(self):
         self.tau = math.inf
@@ -446,9 +441,9 @@ class CASTLE():
         # Group every tuple by the sensitive attribute
         buckets = self.generate_buckets(C)
 
-        # if number of buckets is less than l cannot split
+        # if number of buckets is less then l cannot split
         if len(buckets) < self.l:
-            return {C}
+            return [C]
 
         # While length of buckets greater than l and more than k tuples
         while len(buckets) >= self.l and sum([len(b) for b in buckets.values()]) >= self.k:
@@ -462,16 +457,20 @@ class CASTLE():
             cnew.insert(t)
 
             # Delete t from b
-            del buckets[pid]
+            if not bucket:
+                del buckets[pid]
 
-            for bucket in buckets.values():
+            empty = []
+
+            for pid, bucket in buckets.items():
+
                 # Sort the bucket by the enlargement value of that cluster
                 sorted_bucket = sorted(bucket, key=lambda t: C.tuple_enlargement(t, self.global_ranges))
 
                 # Count the number of tuples we have
                 total_tuples = sum([len(b) for b in buckets.values()])
                 # Calculate the number of tuples we should take
-                chosen_count = int(self.k * (len(sorted_bucket) / total_tuples))
+                chosen_count = int(max(self.k * (len(sorted_bucket) / total_tuples), 1))
                 # Get the subset of tuples
                 subset = sorted_bucket[:chosen_count]
 
@@ -482,7 +481,10 @@ class CASTLE():
 
                 # if bucket is empty delete the bucket
                 if not bucket:
-                    del bucket
+                    empty.append(pid)
+
+            for pid in empty:
+                del buckets[pid]
 
             sc.append(cnew)
 
@@ -498,7 +500,7 @@ class CASTLE():
         for c in sc:
             for t in c.contents:
                 G = [t_h for t_h in C.contents if t_h['pid'] == t['pid']]
-                for g in G:
+                for _ in G:
                     c.insert(t)
 
             self.big_gamma.append(c)
@@ -543,7 +545,7 @@ class CASTLE():
         """
         gamma_c = [cluster for cluster in self.big_gamma if cluster != c]
 
-        while len(c) < self.k:
+        while len(c) < self.k or len(c.diversity) < self.l:
             # Get the cluster with the lowest enlargement value
             lowest_enlargement_cluster = min(gamma_c, key=lambda cl: c.cluster_enlargement(cl, self.global_ranges))
             items = [t for t in lowest_enlargement_cluster.contents]

@@ -67,7 +67,7 @@ def test_ml1():
 	for(_, row) in frame.iterrows():
 		counter+=1
 		stream.insert(row)
-	
+
 	# A function which tells us if there are any tuples which haven't been outputted yet
 
 	avg = mlu.average_group(sarray)
@@ -96,7 +96,7 @@ def test_ml2():
 		valid = validation(frame_norm, frame[sensitive_attr], i)
 		total += valid
 	print("Average Accuracy for Regular Data: {}".format(total/9))
-	
+
 	frame["pid"] = frame.index
 	params = Parameters(args)
 	stream = CASTLE(handler, headers, sensitive_attr, params)
