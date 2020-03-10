@@ -335,7 +335,7 @@ class CASTLE():
         if m > len(self.big_gamma) / 2:
             return self.suppress_tuple(t)
 
-        total_tuples = sum([len(cluster) for cluster in self.big_gamma])
+        total_tuples = len({t['pid'] for t in self.global_tuples})
         diversity_values = set()
 
         for cluster in self.big_gamma:
