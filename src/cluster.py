@@ -71,16 +71,13 @@ class Cluster():
         gen_tuple = copy.deepcopy(t)
 
         for h, v in self.ranges.items():
-            gen_tuple.data.loc['min' + h] = v.lower
-
             # Pick a random person to use for this attribute
             if not h in self.sample_values:
                 self.sample_values[h] = np.random.choice(self.contents)[h]
 
+            gen_tuple.data.loc['min' + h] = v.lower
             gen_tuple.data.loc['spc' + h] = self.sample_values[h]
-
             gen_tuple.data.loc['max' + h] = v.upper
-
 
             gen_tuple.headers.append('min' + h)
             gen_tuple.headers.append('spc' + h)
@@ -88,6 +85,8 @@ class Cluster():
 
             gen_tuple.headers.remove(h)
             del gen_tuple.data[h]
+
+        del gen_tuple.data['pid']
 
         return gen_tuple, t
 

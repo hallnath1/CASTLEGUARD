@@ -28,7 +28,7 @@ class Parameters():
         self.beta = 5
         self.mu = 5
         self.l = 1
-        self.phi = 1
+        self.phi = 100
         self.dp = True
         self.big_beta = 1
 
@@ -54,7 +54,7 @@ class Parameters():
         Returns: Value if it exists, default otherwise
 
         """
-        return value if value else default
+        return value if value is not None else default
 
     def __str__(self):
         """Returns a string representation of the object
@@ -84,6 +84,7 @@ class CASTLE():
         """
         self.callback: Callable[[pd.Series], None] = callback
 
+        self.history: List[Item] = []
         self.deque: Deque = deque()
         self.headers: List[str] = headers
         self.sensitive_attr: str = sensitive_attr
@@ -214,6 +215,7 @@ class CASTLE():
             for t in [c for c in cluster.contents]:
                 [generalised, original_tuple] = cluster.generalise(t)
                 self.callback(generalised)
+                self.history.append(original_tuple)
                 output_pids.add(t['pid'])
                 output_diversity.add(t.sensitive_attr)
                 self.suppress_tuple(original_tuple)
@@ -233,7 +235,6 @@ class CASTLE():
             assert len(cluster) == 0
 
             self.big_omega.append(cluster)
-            self.big_gamma.remove(cluster)
 
     def update_tau(self):
         self.tau = math.inf
@@ -264,6 +265,9 @@ class CASTLE():
         # Remove the tuple from its cluster
         containing_cluster = t.parent
         containing_cluster.remove(t)
+
+        if not containing_cluster.contents:
+            self.big_gamma.remove(containing_cluster)
 
     def best_selection(self, t: Item) -> Optional[Cluster]:
         """Finds the best matching cluster for <element>
@@ -324,6 +328,7 @@ class CASTLE():
             random_cluster = np.random.choice(KCset)
             generalised, original = random_cluster.generalise(t)
             self.suppress_tuple(original)
+            self.history.append(original)
             return self.callback(generalised)
 
         m = 0
