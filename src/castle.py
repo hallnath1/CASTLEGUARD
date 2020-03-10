@@ -220,8 +220,7 @@ class CASTLE():
         unique_pids = len(set(t['pid'] for t in c.contents))
         sc = [c] if unique_pids < 2 * self.k or len(c.diversity) < self.l else self.split_l(c)
         for cluster in sc:
-            contents = cluster.contents.copy()
-            for t in contents:
+            for t in [c for c in cluster.contents]:
                 [generalised, original_tuple] = cluster.generalise(t)
                 self.callback(generalised)
                 output_pids.add(t['pid'])
@@ -238,16 +237,12 @@ class CASTLE():
 
             self.update_tau()
 
-        assert len(output_pids) >= self.k
-        assert len(output_diversity) >= self.l
+            assert len(output_pids) >= self.k
+            assert len(output_diversity) >= self.l
+            assert len(cluster) == 0
 
-            # TODO: Decide whether to delete cluster or move to self.big_omega #
-            # TODO: This should probably happen #
-            # self.big_gamma.remove(cluster)
-
-        # for t in cluster.contents:
-        #     print("FOR T")
-        #     self.callback(t)
+            self.big_omega.append(cluster)
+            self.big_gamma.remove(cluster)
 
     def update_tau(self):
         self.tau = math.inf
