@@ -58,7 +58,7 @@ def test_ml1():
 										headers=["Age","GPA", "HoursPW", "EducationLvl", "Employed"],
 										datatypes=["int120","float5", "int56", "int6", "int2"]))
 	headers = ["Age","GPA", "HoursPW", "EducationLvl"]
-	params = Parameters(args.k, args.delta, args.beta, args.mu, args.l)
+	params = Parameters(args.k, args.delta, args.beta, args.mu, args.l, args.phi, args.disable_dp, args.big_beta)
 	sensitive_attr = "Employed"
 	stream = CASTLE(handler, headers, sensitive_attr, params)
 
@@ -98,7 +98,7 @@ def test_ml2():
 	print("Average Accuracy for Regular Data: {}".format(total/9))
 	
 	frame["pid"] = frame.index
-	params = Parameters(args.k, args.delta, args.beta, args.mu, args.l)
+	params = Parameters(args.k, args.delta, args.beta, args.mu, args.l, args.phi, args.disable_dp, args.big_beta)
 	stream = CASTLE(handler, headers, sensitive_attr, params)
 
 	global counter

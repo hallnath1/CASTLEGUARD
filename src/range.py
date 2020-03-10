@@ -58,6 +58,17 @@ class Range():
         """
         return self.lower <= value and value <= self.upper
 
+    def difference(self):
+        """Finds the total range of this item
+
+        Args:
+            value: The value to perform bounds checking for
+
+        Returns: Difference between upper and lower
+
+        """
+        return abs(self.upper - self.lower)
+
     def __truediv__(self, other: Range):
         """Allows for the shorthand notation r1/r2 instead of r1.VInfoLoss(r2)
 

@@ -19,6 +19,31 @@ class Item:
         self.sensitive_attr: str = data[sensitive_attr] if sensitive_attr else None
         self.parent = None
 
+    def tuple_distance(self, t: Item) -> float:
+        """Calculates the distance between the two tuples
+
+        Args:
+            t: The tuple to calculate the distance to
+
+        Returns: The distance to the tuple
+
+        """
+        s = self.data[self.headers]
+        t = t.data[self.headers]
+        error = s.sub(t).abs()
+        mean_squared_error = error.pow(2).mean(axis=0)
+        return math.sqrt(mean_squared_error)
+
+    def update_attribute(self, header: str, value: float):
+        """Updates a value in the tuple's data
+
+        Args:
+            header: The header to change
+            value: The value to change to
+
+        """
+        self.data[header] = value
+
     def __getitem__(self, key: str) -> Any:
         """Gets the attribute-value for a given key
 
@@ -39,18 +64,3 @@ class Item:
 
     def __eq__(self, i):
         return self.headers == i.headers and self.data.equals(i.data)
-
-    def tuple_distance(self, t: Item) -> float:
-        """Calculates the distance between the two tuples
-
-        Args:
-            t: The tuple to calculate the distance to
-
-        Returns: The distance to the tuple
-
-        """
-        s = self.data[self.headers]
-        t = t.data[self.headers]
-        error = s.sub(t).abs()
-        mean_squared_error = error.pow(2).mean(axis=0)
-        return math.sqrt(mean_squared_error)
