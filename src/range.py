@@ -40,7 +40,7 @@ class Range():
         do = other.upper - other.lower
 
         # Deal with division by 0
-        if ds == 0 and do == 0:
+        if do == 0:
             return 0
 
         return ds / do
