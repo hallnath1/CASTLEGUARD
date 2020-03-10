@@ -23,11 +23,11 @@ def generate_parameters(args):
     """
     p = Parameters(args)
 
-    p.k = np.random.randint(1, 100)
-    p.delta = np.random.randint(1, 100)
-    p.beta = np.random.randint(1, 100)
-    p.mu = np.random.randint(1, 100)
-    p.l = np.random.randint(1, 10)
+    p.k = np.random.randint(1, 100) if not args.k else args.k
+    p.delta = np.random.randint(1, 100) if not args.delta else args.delta
+    p.beta = np.random.randint(1, 100) if not args.beta else args.beta
+    p.mu = np.random.randint(1, 100) if not args.mu else args.mu
+    p.l = np.random.randint(1, 10) if not args.l else args.l
 
     return p
 
