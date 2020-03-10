@@ -58,9 +58,13 @@ class CASTLE():
         # Required number of distinct sensitive attributes for a cluster to be complete
         self.l: int = params.l
 
-        self.dp = params.dp
+        # Whether we want to enable differential privacy
+        self.dp: bool = params.dp
+
         if self.dp:
+            # The 'scale' of tuple fudging
             self.phi: int = params.phi
+            # The percentage chance of ignoring a tuple
             self.big_beta: float = params.big_beta
 
         # Set of non-ks anonymised clusters
@@ -70,8 +74,8 @@ class CASTLE():
 
         # Global ranges for the data stream S
         self.global_ranges: Dict[str, Range] = {}
-        # range for the sensitive attribute
-        self.sens_attr_range = Range()
+        # Range for the sensitive attribute
+        self.sensitive_range = Range()
         # Initialise them as empty ranges
         for header in self.headers:
             self.global_ranges[header] = Range()
@@ -92,7 +96,7 @@ class CASTLE():
 
         """
         # Update the sensitive attribute range
-        self.sens_attr_range.update(data.data[self.sensitive_attr])
+        self.sensitive_range.update(data.data[self.sensitive_attr])
 
         for header in self.headers:
             self.global_ranges[header].update(data.data[header])
@@ -110,9 +114,9 @@ class CASTLE():
 
         # Update the global range values
         item = Item(data=data, headers=self.headers, sensitive_attr=self.sensitive_attr)
-
         self.update_global_ranges(item)
 
+        # If we are using differential privacy, fudge our tuples
         if self.dp:
             # Perturb tuple to satsify k anonymity
             self.fudge_tuple(item)
@@ -133,10 +137,10 @@ class CASTLE():
             t_prime = self.global_tuples[0]
             # print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
-        
+
         self.update_tau()
 
-    def fudge_tuple(self, tuple: Item):
+    def fudge_tuple(self, t: Item):
         """ Fudges a tuple based on laplace distribution
 
         Args:
@@ -148,14 +152,14 @@ class CASTLE():
             if self.global_ranges[header].lower is not None and self.global_ranges[header].upper is not None:
                 scale = max(self.global_ranges[header].difference(), 1) / self.phi
                 dist = np.round(np.random.laplace(scale=scale))
-                original_value = tuple.data[header]
-                tuple.fudge_tuple(value=original_value + dist, header=header)
+                original_value = t.data[header]
+                t.update_attribute(header, original_value + dist)
 
-        if self.sens_attr_range.lower is not None and self.sens_attr_range.upper is not None:
-            scale = max(self.sens_attr_range.difference(), 1) / self.phi
+        if self.sensitive_range.lower is not None and self.sensitive_range.upper is not None:
+            scale = max(self.sensitive_range.difference(), 1) / self.phi
             dist = np.round(np.random.laplace(scale=scale))
-            original_value = tuple.data[self.sensitive_attr]
-            tuple.fudge_tuple(value=original_value + dist, header=self.sensitive_attr)
+            original_value = t.data[self.sensitive_attr]
+            t.update_attribute(self.sensitive_attr, original_value + dist)
 
     def output_cluster(self, c: Cluster):
         """Outputs a cluster according to the algorithm

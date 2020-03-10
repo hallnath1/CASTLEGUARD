@@ -98,7 +98,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     return parser
- 
+
 def parse_args() -> argparse.Namespace:
     """Parses the arguments specified on the command line
     Returns: The arguments that were specified on the command line and parsed

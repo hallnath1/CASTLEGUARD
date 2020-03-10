@@ -57,11 +57,15 @@ class Range():
 
         """
         return self.lower <= value and value <= self.upper
-    
+
     def difference(self):
         """Finds the total range of this item
 
-        Returns the difference between upper and lower
+        Args:
+            value: The value to perform bounds checking for
+
+        Returns: Difference between upper and lower
+
         """
         return abs(self.upper - self.lower)
 
