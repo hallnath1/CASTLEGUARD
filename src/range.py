@@ -1,48 +1,86 @@
+from typing import Optional
+
 class Range():
 
     """Stores the lower and upper values for a cluster on a single axis. """
 
-    def __init__(self, lower=None, upper=None):
+    def __init__(self, lower: Optional[float]=None, upper: Optional[float]=None):
         """Initialises the Range with given lower and upper values, or 0s if not provided
 
         Kwargs:
-            lower (TODO): TODO
-            upper (TODO): TODO
-
-        Returns: TODO
+            lower (float): The lower bound of the Range
+            upper (float): The upper bound of the Range
 
         """
-
         self.lower = lower
         self.upper = upper
 
-    def update(self, value):
+    def update(self, value: float):
         """Updates the range if the given value does not fit within the current
         bounds
 
         Args:
-            value (TODO): TODO
-
-        Returns: TODO
+            value (float): A new value to bounds check and update the Range
+            with if needed
 
         """
-        self.lower = min(self.lower, value) if self.lower else value
-        self.upper = max(self.upper, value) if self.upper else value
+        self.lower = min(self.lower, value) if self.lower is not None else value
+        self.upper = max(self.upper, value) if self.upper is not None else value
 
-    def VInfoLoss(self, I):
-        """Calculates VinfoLoss of I defined on page 4 of castle paper.
+    def VInfoLoss(self, other) -> float:
+        """Calculates VInfoLoss of other defined on Page 4 of the CASTLE paper
 
         Args:
-            I (Range): Global range of this attribute
+            other (Range): Global range of this attribute
 
-        Returns: VInfoLoss of I
+        Returns: VInfoLoss with respect to other
 
         """
+        ds = self.upper - self.lower
+        do = other.upper - other.lower
 
-        return (self.upper - self.lower) / (I.upper - I.lower)
+        # Deal with division by 0
+        if do == 0:
+            return 0
 
-    def __truediv__(self, I):
-        return self.VInfoLoss(I)
+        return ds / do
+
+    def within_bounds(self, value: float):
+        """Checks whether the value is within the bounds of the range.
+
+        Args:
+            value: The value to perform bounds checking for
+
+        Returns: Whether or not the value is in bounds
+
+        """
+        return self.lower <= value and value <= self.upper
+
+    def difference(self):
+        """Finds the total range of this item
+
+        Args:
+            value: The value to perform bounds checking for
+
+        Returns: Difference between upper and lower
+
+        """
+        return abs(self.upper - self.lower)
+
+    def __truediv__(self, other):
+        """Allows for the shorthand notation r1/r2 instead of r1.VInfoLoss(r2)
+
+        Args:
+            other: The other range to use
+
+        Returns: The VInfoLoss of other
+
+        """
+        return self.VInfoLoss(other)
 
     def __str__(self):
+        """Creates a string representation of the current Range
+        Returns: A string representation of the current Range
+
+        """
         return "Range [{}, {}]".format(self.lower, self.upper)
