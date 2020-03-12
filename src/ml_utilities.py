@@ -60,6 +60,7 @@ def average_group(group: List[pd.Series], datatypes:List[Tuple]=[]) -> pd.DataFr
 		avg = average_series(s)
 		df = avg.to_frame().transpose()
 		dataframes.append(df)
+		print(df)
 
 	whole = pd.concat(dataframes, ignore_index=True, sort=True) 
 	for t in datatypes:

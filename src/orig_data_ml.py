@@ -69,7 +69,7 @@ def handler(value: pd.Series):
 def main():
 	args = app.parse_args()
 
-	frame = pd.read_csv("adult.csv")
+	frame = pd.read_csv("adult.csv").sample(1000)
 	cat = {
 		"workclass": ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked","?"],
 		"marital-status": ['Married-civ-spouse', "Divorced", "Never-married", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse","?"],
@@ -94,21 +94,22 @@ def main():
 	print("Average Accuracy for Pre-CASTLE: {}%".format(round((total/9)*100, 5)))
 
 	frame["pid"] = frame.index
-	args.k = 100
-	args.l = 1
-	args.delta = 10000
-	args.mu = 100
-	args.beta = 50
+	# args.k = 100
+	# args.l = 1
+	# args.delta = 1000
+	# args.mu = 100
+	# args.beta = 50
 	Phi = [1, 10, 100, 1000]
 	Big_Beta = [0.25, 0.5, 0.75, 1]
 	acc_list = []
+	temp = frame
+	data = mlu.process(temp, cat)
+	data[sensitive_attr]=data[sensitive_attr].astype('int')
 	for args.phi in Phi:
 		print("Phi: {}".format(args.phi))
 		avg_acc_list = []
 		for args.big_beta in Big_Beta:
-			data = frame
-			processed = mlu.process(data, cat)
-			processed[sensitive_attr]=processed[sensitive_attr].astype('int')
+			processed = data
 			print("Big Beta: {}".format(args.big_beta))
 			global sarray
 			sarray = []
