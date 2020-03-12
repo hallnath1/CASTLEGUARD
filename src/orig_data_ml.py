@@ -138,6 +138,6 @@ def main():
 	ax.set_ylabel("Log(Phi)")
 	ax.set_zlabel('Average NN Accuracy Predicting Salary')
 	plt.title("Relationship between Phi and Beta with \n regards to KNN accuracy for Original dataset")
-	plt.show()
+	plt.savefig("OrigData.png")
 
 main()
