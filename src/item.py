@@ -7,8 +7,6 @@ from typing import Any, List
 
 import pandas as pd
 
-from cluster import Cluster
-
 class Item:
 
     """A singular tuple within the CASTLE algorithm. Provides operations
@@ -26,7 +24,7 @@ class Item:
         self.data: pd.Series = data
         self.headers: List[str] = headers
         self.sensitive_attr: float = data[sensitive_attr] if sensitive_attr else None
-        self.parent: Cluster = None
+        self.parent = None
 
     def tuple_distance(self, other) -> float:
         """Calculates the distance between the two tuples

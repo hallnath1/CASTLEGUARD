@@ -114,7 +114,7 @@ class Cluster():
 
         return (given - current) / len(self.ranges)
 
-    def cluster_enlargement(self, cluster: Cluster, global_ranges: Dict[str, Range]) -> float:
+    def cluster_enlargement(self, cluster, global_ranges: Dict[str, Range]) -> float:
         """Calculates the enlargement value for merging <cluster> into this cluster
 
         Args:
@@ -152,7 +152,7 @@ class Cluster():
 
         return loss
 
-    def information_loss_given_c(self, cluster: Cluster, global_ranges: Dict[str, Range]) -> float:
+    def information_loss_given_c(self, cluster, global_ranges: Dict[str, Range]) -> float:
         """Calculates the information loss upon merging <cluster> into this cluster
 
         Args:
