@@ -18,6 +18,7 @@ from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropo
 
 
 sarray = []
+ks = [10, 15, 20, 25, 30, 35, 40, 45, 50]
 	
 def accuracy(pred, actual):
 #     Go through each row and inspect each value
@@ -64,81 +65,122 @@ def NN(X, Y):
 	print("Test Accuracy: {}".format(score[1]))
 
 def handler(value: pd.Series):
+	print("Output: {}".format(value.data['pid']))
 	sarray.append(value.data)    
 
 def main():
 	args = app.parse_args()
 
-	frame = pd.read_csv("adult.csv").sample(1000)
+	frame = pd.read_csv("adult.csv")
 	cat = {
 		"workclass": ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked","?"],
-		"marital-status": ['Married-civ-spouse', "Divorced", "Never-married", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse","?"],
+		"maritalstatus": ['Married-civ-spouse', "Divorced", "Never-married", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse","?"],
 		"occupation": ["Tech-support", "Craft-repair", "Other-service", "Sales", "Exec-managerial", "Prof-specialty", "Handlers-cleaners", "Machine-op-inspct", "Adm-clerical", "Farming-fishing", "Transport-moving", "Priv-house-serv", "Protective-serv", "Armed-Forces","?"],
 		"relationship": ["Wife", "Own-child", "Husband", "Not-in-family", "Other-relative", "Unmarried","?"],
 		"race": ["White", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other", "Black","?"],
 		"sex": ["Male", "Female","?"],
-		"native-country": ["United-States", "Cambodia", "England", "Puerto-Rico", "Canada", "Germany", "Outlying-US(Guam-USVI-etc)", "India", "Japan", "Greece", "South", "China", "Cuba", "Iran", "Honduras", "Philippines", "Italy", "Poland", "Jamaica", "Vietnam", "Mexico", "Portugal", "Ireland", "France", "Dominican-Republic", "Laos", "Ecuador", "Taiwan", "Haiti", "Columbia", "Hungary", "Guatemala", "Nicaragua", "Scotland", "Thailand", "Yugoslavia", "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands","?"],
+		"nativecountry": ["United-States", "Cambodia", "England", "Puerto-Rico", "Canada", "Germany", "Outlying-US(Guam-USVI-etc)", "India", "Japan", "Greece", "South", "China", "Cuba", "Iran", "Honduras", "Philippines", "Italy", "Poland", "Jamaica", "Vietnam", "Mexico", "Portugal", "Ireland", "France", "Dominican-Republic", "Laos", "Ecuador", "Taiwan", "Haiti", "Columbia", "Hungary", "Guatemala", "Nicaragua", "Scotland", "Thailand", "Yugoslavia", "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands","?"],
 		"salary": [">50K", "<=50K","?"]
 		}
 	frame["pid"] = frame.index
-	headers = ["age", "workclass", "fnlwgt", "marital-status", "education-num", "occupation", "relationship", "race", "sex", "native-country", "capital-gain", "capital-loss", "hours-per-week"]
+	headers = ["age", "workclass", "fnlwgt", "maritalstatus", "educationnum", "occupation", "relationship", "race", "sex", "nativecountry", "capitalgain", "capitalloss", "hoursperweek"]
 	sensitive_attr = "salary"
 	total = 0
 	data = frame
 	processed = mlu.process(data, cat)
 	processed[sensitive_attr]=processed[sensitive_attr].astype('int')
-	for i in range(1, 10):
+	for i in ks:
 		valid = validation(processed[headers], processed[sensitive_attr], i)
 		print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
 		total += valid
-	print("Average Accuracy for Pre-CASTLE: {}%".format(round((total/9)*100, 5)))
+	print("Average Accuracy for Pre-CASTLE: {}%".format(round((total/len(ks))*100, 5)))
 
 	frame["pid"] = frame.index
-	# args.k = 100
-	# args.l = 1
-	# args.delta = 1000
-	# args.mu = 100
-	# args.beta = 50
-	Phi = [1, 10, 100, 1000]
-	Big_Beta = [0.25, 0.5, 0.75, 1]
+	args.k = 1000
+	args.l = 1
+	args.delta = 1000
+	args.mu = 100
+	args.beta = 50
+	# Phi = [1, 10, 100, 1000]
+	# Big_Beta = [0.25, 0.5, 0.75, 1]
+	args.phi = 1000
+	args.big_beta = 1
 	acc_list = []
 	temp = frame
 	data = mlu.process(temp, cat)
 	data[sensitive_attr]=data[sensitive_attr].astype('int')
-	for args.phi in Phi:
-		print("Phi: {}".format(args.phi))
-		avg_acc_list = []
-		for args.big_beta in Big_Beta:
-			processed = data
-			print("Big Beta: {}".format(args.big_beta))
-			global sarray
-			sarray = []
-			params = Parameters(args)
-			stream = CASTLE(handler, headers, sensitive_attr, params)
+	# for args.phi in Phi:
+	# 	print("Phi: {}".format(args.phi))
+	# 	avg_acc_list = []
+	# 	for args.big_beta in Big_Beta:
+	# 		processed = data
+	# 		print("Big Beta: {}".format(args.big_beta))
+	# 		global sarray
+	# 		sarray = []
+	# 		params = Parameters(args)
+	# 		stream = CASTLE(handler, headers, sensitive_attr, params)
 
-			for(_, row) in processed.iterrows():
-				stream.insert(row)
+	# 		for(_, row) in data.iterrows():
+	# 			stream.insert(row)
 
-			avg = mlu.average_group(sarray)
-			avg_features = avg[headers]
-			avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
-			total = 0
-			print(len(sarray))
-			for i in range(1, 10):
-				valid = validation(avg_norm, avg[sensitive_attr], i)
-				print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
-				total+=valid
-			avg_acc_list.append(total/9)
-		acc_list.append(np.array(avg_acc_list))
+	# 		avg = mlu.average_group(sarray)
+	# 		avg_features = avg[headers]
+	# 		avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
+	# 		total = 0
+	# 		avg[sensitive_attr]=avg[sensitive_attr].astype('int')
+	# 		for i in ks:
+	# 			valid = validation(avg_norm, avg[sensitive_attr], i)
+	# 			print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
+	# 			total+=valid
+	# 		avg_acc_list.append(total/9)
+	# 	acc_list.append(np.array(avg_acc_list))
 
-	X, Y = np.meshgrid(Big_Beta, np.log(Phi))
-	fig = plt.figure()
-	ax = plt.axes(projection='3d')
-	ax.plot_surface(X, Y, np.array(acc_list), rstride=1, cstride=1, cmap='winter', edgecolor='none')
-	ax.set_xlabel("Big Beta")
-	ax.set_ylabel("Log(Phi)")
-	ax.set_zlabel('Average NN Accuracy Predicting Salary')
-	plt.title("Relationship between Phi and Beta with \n regards to KNN accuracy for Original dataset")
-	plt.savefig("OrigData.png")
+	processed = data
+	print("Big Beta: {}".format(args.big_beta))
+	global sarray
+	sarray = []
+	params = Parameters(args)
+	stream = CASTLE(handler, headers, sensitive_attr, params)
+
+	for(_, row) in data.iterrows():
+		stream.insert(row)
+	
+	dataframes = []
+	for s in sarray:
+		df = s.to_frame().transpose()
+		dataframes.append(df)
+	avg = pd.concat(dataframes, ignore_index=True, sort=True) 
+
+	avg_features = avg[headers]
+	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
+	total = 0
+	avg[sensitive_attr]=avg[sensitive_attr].astype('int')
+	for i in ks:
+		valid = validation(avg_norm, avg[sensitive_attr], i)
+		print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
+		total+=valid
+	print("All Data AVG: {}%".format(round(total/len(ks)),5))
+	
+	avg = mlu.average_group(sarray)
+	
+	avg_features = avg[headers]
+	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
+	total = 0
+	avg[sensitive_attr]=avg[sensitive_attr].astype('int')
+	for i in ks:
+		valid = validation(avg_norm, avg[sensitive_attr], i)
+		print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
+		total+=valid
+	print("Averaged Data AVG: {}%".format(round(total/len(ks)),5))
+
+	# X, Y = np.meshgrid(Big_Beta, np.log(Phi))
+	# fig = plt.figure()
+	# ax = plt.axes(projection='3d')
+	# ax.plot_surface(X, Y, np.array(acc_list), rstride=1, cstride=1, cmap='winter', edgecolor='none')
+	# ax.set_xlabel("Big Beta")
+	# ax.set_ylabel("Log(Phi)")
+	# ax.set_zlabel('Average Accuracy Predicting Salary')
+	# plt.title("Relationship between Phi and Beta with \n regards to KNN accuracy for Original dataset")
+	# plt.savefig("OrigData.png")
 
 main()
