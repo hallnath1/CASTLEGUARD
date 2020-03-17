@@ -108,8 +108,6 @@ def main():
 	Big_Beta = [0.25, 0.5, 0.75, 1]
 	acc_list = []
 	temp = frame
-	data = mlu.process(temp, cat)
-	data[sensitive_attr]=data[sensitive_attr].astype('int')
 	print("Starting Loop")
 	for args.phi in Phi:
 		print("Phi: {}".format(args.phi))
@@ -118,13 +116,13 @@ def main():
 			print("Big Beta: {}".format(args.big_beta))
 			average = 0
 			for loop in range(0, 10):
-				processed = data
+				data = processed
 				global sarray
 				sarray = []
 				params = Parameters(args)
 				stream = CASTLE(handler, headers, sensitive_attr, params)
 				print("Starting CASTLE")
-				for(_, row) in processed.iterrows():
+				for(_, row) in data.iterrows():
 					stream.insert(row)
 				print("Finished CASTLE")
 				print(len(sarray))
