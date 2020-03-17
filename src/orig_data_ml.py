@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import os
 import app
-import keras
-from keras import backend
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropout
+# import keras
+# from keras import backend
+# from keras.models import Sequential
+# from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropout
 
 
 sarray = []
@@ -48,21 +48,21 @@ def validation(features, labels, nb):
 		pred_val.append(accuracy(pred, y_train))
 	return sum(pred_val) / len(pred_val)
 
-def NN(X, Y):
-	X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3)
-	layers = [Dense(256, activation='relu', use_bias='true', input_dim=8),
-			  Dense(64, activation='relu', use_bias='true', input_dim=256),
-			  Dense(256, activation='relu', use_bias='true', input_dim=64),
-			  Dense(1, activation='sigmoid', use_bias='true', input_dim=256),
-			]
-	model = Sequential(layers)
-	# model.summary()
-	model.compile(loss='binary_crossentropy', optimizer="adam" , metrics=['accuracy'])
-	model_data = model.fit(X_train, Y_train, epochs=1000, batch_size=64, verbose=0)
-	score = model.evaluate(X_test, Y_test, batch_size=64)
+# def NN(X, Y):
+# 	X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.3)
+# 	layers = [Dense(256, activation='relu', use_bias='true', input_dim=8),
+# 			  Dense(64, activation='relu', use_bias='true', input_dim=256),
+# 			  Dense(256, activation='relu', use_bias='true', input_dim=64),
+# 			  Dense(1, activation='sigmoid', use_bias='true', input_dim=256),
+# 			]
+# 	model = Sequential(layers)
+# 	# model.summary()
+# 	model.compile(loss='binary_crossentropy', optimizer="adam" , metrics=['accuracy'])
+# 	model_data = model.fit(X_train, Y_train, epochs=1000, batch_size=64, verbose=0)
+# 	score = model.evaluate(X_test, Y_test, batch_size=64)
 
-	print("Test Loss: {}".format(score[0]))
-	print("Test Accuracy: {}".format(score[1]))
+# 	print("Test Loss: {}".format(score[0]))
+# 	print("Test Accuracy: {}".format(score[1]))
 
 def handler(value: pd.Series):
 	print("Output: {}".format(value.data['pid']))
@@ -84,6 +84,7 @@ def main():
 		}
 	frame["pid"] = frame.index
 	headers = ["age", "workclass", "fnlwgt", "maritalstatus", "educationnum", "occupation", "relationship", "race", "sex", "nativecountry", "capitalgain", "capitalloss", "hoursperweek"]
+	extended_headers = ["spcage","minage","maxage", "spcworkclass","minworkclass","maxworkclass", "spcfnlwgt","minfnlwgt","maxfnlwgt", "spcmaritalstatus","minmaritalstatus","maxmaritalstatus", "spceducationnum","mineducationnum","maxeducationnum", "spcoccupation","minoccupation","maxoccupation", "spcrelationship","minrelationship","maxrelationship", "spcrace","minrace","maxrace", "spcsex","minsex","maxsex", "spcnativecountry","minnativecountry","maxnativecountry", "spccapitalgain","mincapitalgain","maxcapitalgain", "spccapitalloss","mincapitalloss","maxcapitalloss", "spchoursperweek","minhoursperweek","maxhoursperweek"]
 	sensitive_attr = "salary"
 	total = 0
 	data = frame
@@ -98,89 +99,53 @@ def main():
 	frame["pid"] = frame.index
 	args.k = 1000
 	args.l = 1
-	args.delta = 1000
+	args.delta = 10000
 	args.mu = 100
 	args.beta = 50
-	# Phi = [1, 10, 100, 1000]
-	# Big_Beta = [0.25, 0.5, 0.75, 1]
-	args.phi = 1000
-	args.big_beta = 1
+	Phi = [1, 10, 100, 1000]
+	Big_Beta = [0.25, 0.5, 0.75, 1]
 	acc_list = []
 	temp = frame
 	data = mlu.process(temp, cat)
 	data[sensitive_attr]=data[sensitive_attr].astype('int')
-	# for args.phi in Phi:
-	# 	print("Phi: {}".format(args.phi))
-	# 	avg_acc_list = []
-	# 	for args.big_beta in Big_Beta:
-	# 		processed = data
-	# 		print("Big Beta: {}".format(args.big_beta))
-	# 		global sarray
-	# 		sarray = []
-	# 		params = Parameters(args)
-	# 		stream = CASTLE(handler, headers, sensitive_attr, params)
+	for args.phi in Phi:
+		print("Phi: {}".format(args.phi))
+		avg_acc_list = []
+		for args.big_beta in Big_Beta:
+			print("Big Beta: {}".format(args.big_beta))
+			processed = data
+			global sarray
+			sarray = []
+			params = Parameters(args)
+			stream = CASTLE(handler, headers, sensitive_attr, params)
+			print("Starting CASTLE")
+			for(_, row) in data.iterrows():
+				stream.insert(row)
+			print("Finished CASTLE")
+			dataframes = []
+			for s in sarray:
+				df = s.to_frame().transpose()
+				dataframes.append(df)
+			avg = pd.concat(dataframes, ignore_index=True, sort=True)
+			avg_features = avg[extended_headers]
+			total = 0
+			avg[sensitive_attr]=avg[sensitive_attr].astype('int')
+			for i in ks:
+				valid = validation(avg_features, avg[sensitive_attr], i)
+				print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
+				total+=valid
+			print("Phi: {}, BBeta: {}, Average Accuracy: {}%".format(args.phi,args.big_beta, round((total/9)*100), 5))
+			avg_acc_list.append(total/9)
+		acc_list.append(np.array(avg_acc_list))
 
-	# 		for(_, row) in data.iterrows():
-	# 			stream.insert(row)
 
-	# 		avg = mlu.average_group(sarray)
-	# 		avg_features = avg[headers]
-	# 		avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
-	# 		total = 0
-	# 		avg[sensitive_attr]=avg[sensitive_attr].astype('int')
-	# 		for i in ks:
-	# 			valid = validation(avg_norm, avg[sensitive_attr], i)
-	# 			print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
-	# 			total+=valid
-	# 		avg_acc_list.append(total/9)
-	# 	acc_list.append(np.array(avg_acc_list))
-
-	processed = data
-	print("Big Beta: {}".format(args.big_beta))
-	global sarray
-	sarray = []
-	params = Parameters(args)
-	stream = CASTLE(handler, headers, sensitive_attr, params)
-
-	for(_, row) in data.iterrows():
-		stream.insert(row)
-	
-	dataframes = []
-	for s in sarray:
-		df = s.to_frame().transpose()
-		dataframes.append(df)
-	avg = pd.concat(dataframes, ignore_index=True, sort=True) 
-
-	avg_features = avg[headers]
-	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
-	total = 0
-	avg[sensitive_attr]=avg[sensitive_attr].astype('int')
-	for i in ks:
-		valid = validation(avg_norm, avg[sensitive_attr], i)
-		print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
-		total+=valid
-	print("All Data AVG: {}%".format(round(total/len(ks)),5))
-	
-	avg = mlu.average_group(sarray)
-	
-	avg_features = avg[headers]
-	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
-	total = 0
-	avg[sensitive_attr]=avg[sensitive_attr].astype('int')
-	for i in ks:
-		valid = validation(avg_norm, avg[sensitive_attr], i)
-		print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
-		total+=valid
-	print("Averaged Data AVG: {}%".format(round(total/len(ks)),5))
-
-	# X, Y = np.meshgrid(Big_Beta, np.log(Phi))
-	# fig = plt.figure()
-	# ax = plt.axes(projection='3d')
-	# ax.plot_surface(X, Y, np.array(acc_list), rstride=1, cstride=1, cmap='winter', edgecolor='none')
-	# ax.set_xlabel("Big Beta")
-	# ax.set_ylabel("Log(Phi)")
-	# ax.set_zlabel('Average Accuracy Predicting Salary')
-	# plt.title("Relationship between Phi and Beta with \n regards to KNN accuracy for Original dataset")
-	# plt.savefig("OrigData.png")
+	X, Y = np.meshgrid(Big_Beta, np.log(Phi))
+	fig = plt.figure()
+	ax = plt.axes(projection='3d')
+	ax.plot_surface(X, Y, np.array(acc_list), rstride=1, cstride=1, cmap='winter', edgecolor='none')
+	ax.set_xlabel("Big Beta")
+	ax.set_ylabel("Log(Phi)")
+	ax.set_zlabel('Average Accuracy Predicting Salary')
+	plt.savefig("OrigData.png")
 
 main()

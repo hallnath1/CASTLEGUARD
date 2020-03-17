@@ -120,8 +120,7 @@ def main():
 	ax.plot_surface(X, Y, np.array(acc_list), rstride=1, cstride=1, cmap='winter', edgecolor='none')
 	ax.set_xlabel("Big Beta")
 	ax.set_ylabel("Log(Phi)")
-	ax.set_zlabel('Average NN Accuracy')
-	plt.title("Relationship between Phi and Beta with \n regards to KNN accuracy for Diabetes dataset")
+	ax.set_zlabel('Average KNN Accuracy')
 	plt.show()
 
 main()
