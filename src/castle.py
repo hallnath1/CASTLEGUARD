@@ -371,7 +371,6 @@ class CASTLE():
 
         self.output_cluster(mc)
 
-    # TODO: Check this function is correct #
     def split(self, c: Cluster) -> List[Cluster]:
         """Splits a cluster <c>
 
@@ -449,7 +448,6 @@ class CASTLE():
 
         return sc
 
-    # TODO: Check this function is correct #
     def split_l(self, C: Cluster) -> List[Cluster]:
         """Splits a cluster <c> ensuring l-diversity
 
