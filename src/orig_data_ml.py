@@ -65,13 +65,13 @@ def validation(features, labels, nb):
 # 	print("Test Accuracy: {}".format(score[1]))
 
 def handler(value: pd.Series):
-    print("Output: {}".format(value.data['pid']))
+    print("tuple output")
     sarray.append(value.data)    
 
 def main():
     args = app.parse_args()
     print("Loading in data")
-    frame = pd.read_csv("adult.csv").sample(3000)
+    frame = pd.read_csv("adult.csv")
     cat = {
         "workclass": ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked","?"],
         "maritalstatus": ['Married-civ-spouse', "Divorced", "Never-married", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse","?"],
@@ -80,11 +80,13 @@ def main():
         "race": ["White", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other", "Black","?"],
         "sex": ["Male", "Female","?"],
         "nativecountry": ["United-States", "Cambodia", "England", "Puerto-Rico", "Canada", "Germany", "Outlying-US(Guam-USVI-etc)", "India", "Japan", "Greece", "South", "China", "Cuba", "Iran", "Honduras", "Philippines", "Italy", "Poland", "Jamaica", "Vietnam", "Mexico", "Portugal", "Ireland", "France", "Dominican-Republic", "Laos", "Ecuador", "Taiwan", "Haiti", "Columbia", "Hungary", "Guatemala", "Nicaragua", "Scotland", "Thailand", "Yugoslavia", "El-Salvador", "Trinadad&Tobago", "Peru", "Hong", "Holand-Netherlands","?"],
-        "salary": [">50K", "<=50K","?"]
+        "salary": [">50K", "<=50K"]
         }
     frame["pid"] = frame.index
     headers = ["age", "workclass", "fnlwgt", "maritalstatus", "educationnum", "occupation", "relationship", "race", "sex", "nativecountry", "capitalgain", "capitalloss", "hoursperweek"]
     extended_headers = ["spcage","minage","maxage", "spcworkclass","minworkclass","maxworkclass", "spcfnlwgt","minfnlwgt","maxfnlwgt", "spcmaritalstatus","minmaritalstatus","maxmaritalstatus", "spceducationnum","mineducationnum","maxeducationnum", "spcoccupation","minoccupation","maxoccupation", "spcrelationship","minrelationship","maxrelationship", "spcrace","minrace","maxrace", "spcsex","minsex","maxsex", "spcnativecountry","minnativecountry","maxnativecountry", "spccapitalgain","mincapitalgain","maxcapitalgain", "spccapitalloss","mincapitalloss","maxcapitalloss", "spchoursperweek","minhoursperweek","maxhoursperweek"]
+    # headers = ["age", "workclass"]
+    # extended_headers = ["spcage","minage","maxage", "spcworkclass","minworkclass","maxworkclass"]
     sensitive_attr = "salary"
     total = 0
     data = frame
@@ -99,15 +101,15 @@ def main():
     print("Average Accuracy for Pre-CASTLE: {}%".format(round((total/len(ks))*100, 5)))
 
     frame["pid"] = frame.index
-    args.k = 100
+    args.k = 1000
     args.l = 1
-    #args.delta = 1000
+    args.delta = 10000
     args.mu = 100
     args.beta = 50
     Phi = [1, 10, 100, 1000]
     Big_Beta = [0.25, 0.5, 0.75, 1]
     acc_list = []
-    print(processed[headers])
+    print("Size: {}".format(frame.size))
     print("Starting Loop")
     for args.phi in Phi:
         print("Phi: {}".format(args.phi))
@@ -116,16 +118,20 @@ def main():
             print("Big Beta: {}".format(args.big_beta))
             average = 0
             for loop in range(0, 10):
-                data = processed
+                frame = pd.read_csv("adult.csv")
+                print("Processing Data")
+                processed = mlu.process(frame, cat)
+                print("Processed Data")
+                processed[sensitive_attr]=processed[sensitive_attr].astype('int')
+                processed["pid"] = processed.index
                 global sarray
                 sarray = []
                 params = Parameters(args)
                 stream = CASTLE(handler, headers, sensitive_attr, params)
                 print("Starting CASTLE")
-                for(_, row) in data.iterrows():
+                for(_, row) in processed.iterrows():
                     stream.insert(row)
                 print("Finished CASTLE")
-                print(len(sarray))
                 dataframes = []
                 for s in sarray:
                     df = s.to_frame().transpose()
