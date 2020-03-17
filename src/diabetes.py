@@ -71,6 +71,7 @@ def main():
 
 	frame = pd.read_csv("diabetes.csv")
 	headers=["pregnancies","glucose","bloodPressure","skinThickness","insulin","bmi","diabetesPedigree","age"]
+	extended_headers=["spcpregnancies","minpregnancies","maxpregnancies","spcglucose","minglucose","maxglucose","spcbloodPressure","minbloodPressure","maxbloodPressure","spcskinThickness","minskinThickness","maxskinThickness","spcinsulin","mininsulin","maxinsulin","spcbmi","minbmi","maxbmi","spcdiabetesPedigree","mindiabetesPedigree","maxdiabetesPedigree","spcage","minage","maxage"]
 	sensitive_attr = "outcome"
 	total = 0
 	for i in range(1, 10):
@@ -102,13 +103,16 @@ def main():
 			for(_, row) in frame.iterrows():
 				stream.insert(row)
 
-			avg = mlu.average_group(sarray)
-			avg_features = avg[headers]
-			avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
+			dataframes = []
+			for s in sarray:
+				df = s.to_frame().transpose()
+				dataframes.append(df)
+			avg = pd.concat(dataframes, ignore_index=True, sort=True)
+			avg_features = avg[extended_headers]
 			total = 0
 			print(len(sarray))
 			for i in range(1, 10):
-				valid = validation(avg_norm, avg[sensitive_attr], i)
+				valid = validation(avg_features, avg[sensitive_attr], i)
 				print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
 				total+=valid
 			avg_acc_list.append(total/9)
