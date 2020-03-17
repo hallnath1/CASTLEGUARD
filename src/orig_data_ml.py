@@ -65,7 +65,6 @@ def validation(features, labels, nb):
 # 	print("Test Accuracy: {}".format(score[1]))
 
 def handler(value: pd.Series):
-    print("tuple output")
     sarray.append(value.data)    
 
 def main():
