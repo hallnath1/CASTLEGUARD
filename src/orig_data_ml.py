@@ -71,7 +71,7 @@ def handler(value: pd.Series):
 def main():
     args = app.parse_args()
     print("Loading in data")
-    frame = pd.read_csv("adult.csv")
+    frame = pd.read_csv("adult.csv").sample(3000)
     cat = {
         "workclass": ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked","?"],
         "maritalstatus": ['Married-civ-spouse', "Divorced", "Never-married", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse","?"],
@@ -99,15 +99,15 @@ def main():
     print("Average Accuracy for Pre-CASTLE: {}%".format(round((total/len(ks))*100, 5)))
 
     frame["pid"] = frame.index
-    args.k = 1000
+    args.k = 100
     args.l = 1
-    args.delta = 10000
+    #args.delta = 1000
     args.mu = 100
     args.beta = 50
     Phi = [1, 10, 100, 1000]
     Big_Beta = [0.25, 0.5, 0.75, 1]
     acc_list = []
-    temp = frame
+    print(processed[headers])
     print("Starting Loop")
     for args.phi in Phi:
         print("Phi: {}".format(args.phi))
