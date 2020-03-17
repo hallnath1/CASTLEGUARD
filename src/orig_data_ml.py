@@ -124,9 +124,10 @@ def main():
 				params = Parameters(args)
 				stream = CASTLE(handler, headers, sensitive_attr, params)
 				print("Starting CASTLE")
-				for(_, row) in data.iterrows():
+				for(_, row) in processed.iterrows():
 					stream.insert(row)
 				print("Finished CASTLE")
+				print(len(sarray))
 				dataframes = []
 				for s in sarray:
 					df = s.to_frame().transpose()
