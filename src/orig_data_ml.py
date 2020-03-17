@@ -132,7 +132,7 @@ def main():
 			avg[sensitive_attr]=avg[sensitive_attr].astype('int')
 			for i in ks:
 				valid = validation(avg_features, avg[sensitive_attr], i)
-				print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
+				# print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
 				total+=valid
 			print("Phi: {}, BBeta: {}, Average Accuracy: {}%".format(args.phi,args.big_beta, round((total/9)*100), 5))
 			avg_acc_list.append(total/9)
@@ -145,7 +145,8 @@ def main():
 	ax.plot_surface(X, Y, np.array(acc_list), rstride=1, cstride=1, cmap='winter', edgecolor='none')
 	ax.set_xlabel("Big Beta")
 	ax.set_ylabel("Log(Phi)")
-	ax.set_zlabel('Average Accuracy Predicting Salary')
-	plt.savefig("OrigData.png")
+	ax.set_zlabel('Average Accuracy of KNN for Predicting Salary')
+	# plt.savefig("OrigData.png")
+	plt.show()
 
 main()
