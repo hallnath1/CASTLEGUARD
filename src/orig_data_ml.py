@@ -146,7 +146,7 @@ def main():
 	ax.set_xlabel("Big Beta")
 	ax.set_ylabel("Log(Phi)")
 	ax.set_zlabel('Average Accuracy of KNN for Predicting Salary')
-	# plt.savefig("OrigData.png")
-	plt.show()
+	plt.savefig("OrigData.png")
+	# plt.show()
 
 main()
