@@ -113,29 +113,33 @@ def main():
 		avg_acc_list = []
 		for args.big_beta in Big_Beta:
 			print("Big Beta: {}".format(args.big_beta))
-			processed = data
-			global sarray
-			sarray = []
-			params = Parameters(args)
-			stream = CASTLE(handler, headers, sensitive_attr, params)
-			print("Starting CASTLE")
-			for(_, row) in data.iterrows():
-				stream.insert(row)
-			print("Finished CASTLE")
-			dataframes = []
-			for s in sarray:
-				df = s.to_frame().transpose()
-				dataframes.append(df)
-			avg = pd.concat(dataframes, ignore_index=True, sort=True)
-			avg_features = avg[extended_headers]
-			total = 0
-			avg[sensitive_attr]=avg[sensitive_attr].astype('int')
-			for i in ks:
-				valid = validation(avg_features, avg[sensitive_attr], i)
-				# print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
-				total+=valid
-			print("Phi: {}, BBeta: {}, Average Accuracy: {}%".format(args.phi,args.big_beta, round((total/9)*100), 5))
-			avg_acc_list.append(total/9)
+			average = 0
+			for loop in range(0, 10):
+				processed = data
+				global sarray
+				sarray = []
+				params = Parameters(args)
+				stream = CASTLE(handler, headers, sensitive_attr, params)
+				print("Starting CASTLE")
+				for(_, row) in data.iterrows():
+					stream.insert(row)
+				print("Finished CASTLE")
+				dataframes = []
+				for s in sarray:
+					df = s.to_frame().transpose()
+					dataframes.append(df)
+				avg = pd.concat(dataframes, ignore_index=True, sort=True)
+				avg_features = avg[extended_headers]
+				total = 0
+				avg[sensitive_attr]=avg[sensitive_attr].astype('int')
+				for i in ks:
+					valid = validation(avg_features, avg[sensitive_attr], i)
+					# print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
+					total+=valid
+				average += (total/9)
+				print("Phi: {}, BBeta: {}, Average Accuracy: {}%".format(args.phi,args.big_beta, round((total/9)*100), 5))
+			avg_acc_list.append(average/10)
+			print("Overall Average: {}%".format((average/10)*100))
 		acc_list.append(np.array(avg_acc_list))
 
 
