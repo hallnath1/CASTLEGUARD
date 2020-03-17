@@ -18,6 +18,7 @@ from keras.layers import Dense, Activation, Conv2D, Flatten, MaxPooling2D, Dropo
 
 
 sarray = []
+ks = [10, 15, 20, 25, 30, 35, 40, 45, 50]
 	
 def accuracy(pred, actual):
 #     Go through each row and inspect each value
@@ -74,15 +75,16 @@ def main():
 	extended_headers=["spcpregnancies","minpregnancies","maxpregnancies","spcglucose","minglucose","maxglucose","spcbloodPressure","minbloodPressure","maxbloodPressure","spcskinThickness","minskinThickness","maxskinThickness","spcinsulin","mininsulin","maxinsulin","spcbmi","minbmi","maxbmi","spcdiabetesPedigree","mindiabetesPedigree","maxdiabetesPedigree","spcage","minage","maxage"]
 	sensitive_attr = "outcome"
 	total = 0
-	for i in range(1, 10):
+	for i in ks:
 		valid = validation(frame, frame[sensitive_attr], i)
+		print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
 		total += valid
 	print("Average Accuracy for Pre-CASTLE: {}%".format(round((total/9)*100, 5)))
 
 	frame["pid"] = frame.index
-	args.k = 5
+	args.k = 7
 	args.l = 1
-	# args.delta = 100
+	args.delta = 100
 	args.mu = 100
 	args.beta = 25
 	Phi = [1, 10, 100, 1000]
@@ -92,30 +94,35 @@ def main():
 		print("Phi: {}".format(args.phi))
 		avg_acc_list = []
 		for args.big_beta in Big_Beta:
-			frame = pd.read_csv("diabetes.csv")
-			frame["pid"] = frame.index
 			print("Big Beta: {}".format(args.big_beta))
-			global sarray
-			sarray = []
-			params = Parameters(args)
-			stream = CASTLE(handler, headers, sensitive_attr, params)
+			average = 0
+			for looping in range(0, 10):
+				frame = pd.read_csv("diabetes.csv")
+				frame["pid"] = frame.index
+				
+				global sarray
+				sarray = []
+				params = Parameters(args)
+				stream = CASTLE(handler, headers, sensitive_attr, params)
 
-			for(_, row) in frame.iterrows():
-				stream.insert(row)
+				for(_, row) in frame.iterrows():
+					stream.insert(row)
 
-			dataframes = []
-			for s in sarray:
-				df = s.to_frame().transpose()
-				dataframes.append(df)
-			avg = pd.concat(dataframes, ignore_index=True, sort=True)
-			avg_features = avg[extended_headers]
-			total = 0
-			print(len(sarray))
-			for i in range(1, 10):
-				valid = validation(avg_features, avg[sensitive_attr], i)
-				print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
-				total+=valid
-			avg_acc_list.append(total/9)
+				dataframes = []
+				for s in sarray:
+					df = s.to_frame().transpose()
+					dataframes.append(df)
+				avg = pd.concat(dataframes, ignore_index=True, sort=True)
+				avg_features = avg[extended_headers]
+				total = 0
+				for i in ks:
+					valid = validation(avg_features, avg[sensitive_attr], i)
+					# print("K={} Accuracy: {}%".format(i, round(valid*100), 5))
+					total+=valid
+				print("Accuracy: {}%".format((total/9)*100))
+				average+=(total/9)
+			print("Average Accuracy: {}%".format((average/10)*100))
+			avg_acc_list.append(average/10)
 		acc_list.append(np.array(avg_acc_list))
 
 	X, Y = np.meshgrid(Big_Beta, np.log(Phi))
