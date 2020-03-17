@@ -1,5 +1,7 @@
 # CASTLEGUARD
 
+[![Build Status](https://travis-ci.com/hallnath1/CASTLEGUARD.svg?token=CbJDgsGLo7GCV1xLzUAy&branch=master)](https://travis-ci.com/hallnath1/CASTLEGUARD)
+
 CASTLEGUARD stands for Continuously Anonymizing STreaming data via adaptive
 cLustEring with GUARanteed Differential privacy and is an extension to the
 existing CASTLE algorithm.
