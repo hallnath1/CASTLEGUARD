@@ -70,7 +70,7 @@ def handler(value: pd.Series):
 
 def main():
 	args = app.parse_args()
-
+	print("Loading in data")
 	frame = pd.read_csv("adult.csv")
 	cat = {
 		"workclass": ["Private", "Self-emp-not-inc", "Self-emp-inc", "Federal-gov", "Local-gov", "State-gov", "Without-pay", "Never-worked","?"],
@@ -88,7 +88,9 @@ def main():
 	sensitive_attr = "salary"
 	total = 0
 	data = frame
+	print("Processing Data")
 	processed = mlu.process(data, cat)
+	print("Processed Data")
 	processed[sensitive_attr]=processed[sensitive_attr].astype('int')
 	for i in ks:
 		valid = validation(processed[headers], processed[sensitive_attr], i)
@@ -108,6 +110,7 @@ def main():
 	temp = frame
 	data = mlu.process(temp, cat)
 	data[sensitive_attr]=data[sensitive_attr].astype('int')
+	print("Starting Loop")
 	for args.phi in Phi:
 		print("Phi: {}".format(args.phi))
 		avg_acc_list = []
