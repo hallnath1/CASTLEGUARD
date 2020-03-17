@@ -85,8 +85,6 @@ def main():
     frame["pid"] = frame.index
     headers = ["age", "workclass", "fnlwgt", "maritalstatus", "educationnum", "occupation", "relationship", "race", "sex", "nativecountry", "capitalgain", "capitalloss", "hoursperweek"]
     extended_headers = ["spcage","minage","maxage", "spcworkclass","minworkclass","maxworkclass", "spcfnlwgt","minfnlwgt","maxfnlwgt", "spcmaritalstatus","minmaritalstatus","maxmaritalstatus", "spceducationnum","mineducationnum","maxeducationnum", "spcoccupation","minoccupation","maxoccupation", "spcrelationship","minrelationship","maxrelationship", "spcrace","minrace","maxrace", "spcsex","minsex","maxsex", "spcnativecountry","minnativecountry","maxnativecountry", "spccapitalgain","mincapitalgain","maxcapitalgain", "spccapitalloss","mincapitalloss","maxcapitalloss", "spchoursperweek","minhoursperweek","maxhoursperweek"]
-    # headers = ["age", "workclass"]
-    # extended_headers = ["spcage","minage","maxage", "spcworkclass","minworkclass","maxworkclass"]
     sensitive_attr = "salary"
     total = 0
     data = frame
@@ -107,9 +105,9 @@ def main():
     args.mu = 100
     args.beta = 50
     Phi = [1, 10, 100, 1000]
-    Big_Beta = [0.25, 0.5, 0.75, 1]
+    Big_Beta = [0.35, 0.5, 0.75, 1]
     acc_list = []
-    print("Size: {}".format(frame.size))
+    print("Size: {}".format(frame.shape))
     print("Starting Loop")
     for args.phi in Phi:
         print("Phi: {}".format(args.phi))
@@ -132,6 +130,7 @@ def main():
                 for(_, row) in processed.iterrows():
                     stream.insert(row)
                 print("Finished CASTLE")
+                print(len(sarray))
                 dataframes = []
                 for s in sarray:
                     df = s.to_frame().transpose()
