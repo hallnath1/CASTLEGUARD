@@ -105,7 +105,7 @@ def main():
     args.mu = 100
     args.beta = 50
     Phi = [1, 10, 100, 1000]
-    Big_Beta = [0.35, 0.5, 0.75, 1]
+    Big_Beta = [0.25, 0.5, 0.75, 1]
     acc_list = []
     print("Size: {}".format(frame.shape))
     print("Starting Loop")
@@ -127,8 +127,13 @@ def main():
                 params = Parameters(args)
                 stream = CASTLE(handler, headers, sensitive_attr, params)
                 print("Starting CASTLE")
+                counter = 0
                 for(_, row) in processed.iterrows():
+                    counter += 1
                     stream.insert(row)
+                while(counter <= args.delta):
+                    counter+=1
+                    stream.cycle()
                 print("Finished CASTLE")
                 print(len(sarray))
                 dataframes = []
