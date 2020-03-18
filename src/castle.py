@@ -1,11 +1,10 @@
 import math
 
-import numpy as np
-import pandas as pd
-
 from typing import Any, Callable, Deque, Dict, List, Optional
 from collections import deque
-from dataclasses import dataclass
+
+import numpy as np
+import pandas as pd
 
 from cluster import Cluster
 from range import Range
@@ -71,7 +70,13 @@ class CASTLE():
     """An implementation of the CASTLE Algorithm designed by Jianneng Cao,
     Barbara Carminati, Elena Ferrari and Kian-Lee Tan."""
 
-    def __init__(self, callback: Callable[[pd.Series], None], headers: List[str], sensitive_attr: str, params: Parameters):
+    def __init__(
+            self,
+            callback: Callable[[pd.Series], None],
+            headers: List[str],
+            sensitive_attr: str,
+            params: Parameters
+    ):
         """Initialises the CASTLE algorithm with necessary parameters.
 
         Args:
@@ -154,7 +159,8 @@ class CASTLE():
             self.global_ranges[header].update(data.data[header])
 
     def insert(self, data: pd.Series):
-        """Inserts a new piece of data into the algorithm and its state
+        """Inserts a new piece of data into the algorithm and updates the
+        state, checking whether data needs to be output as well
 
         Args:
             data: The element of data to insert into the algorithm
@@ -185,27 +191,40 @@ class CASTLE():
 
         # If we now have too many tuples, try and output one
         if len(self.global_tuples) > self.delta:
-            self.cycle()
+            self.delay_constraint(self.global_tuples[0])
 
         self.update_tau()
 
     def cycle(self):
-        # Get the next tuple to be output
-        if len(self.global_tuples) > 0:
-            t_prime = self.global_tuples[0]
-            # print("Attempting to output: \n{}".format(t_prime))
-            self.delay_constraint(t_prime)
+        """Performs a 'tick' operation for CASTLE.
 
+        By default, tuples are only ever output by the algorithm when another
+        has been inserted. In systems where the input stream is sparse, this
+        may cause long delays between outputs. To simulate time-series data,
+        users can call this function to attempt to output tuples if possible.
+
+        Consider a system where every second, either a tuple is inserted or
+        nothing happens. The user can call insert when they want to insert a
+        tuple, or this function to try and output a tuple in the case of a
+        no-operation.
+
+        """
+        # Get the next tuple to be output
+        if self.global_tuples:
+            self.delay_constraint(self.global_tuples[0])
 
     def fudge_tuple(self, t: Item):
         """ Fudges a tuple based on laplace distribution
 
         Args:
-            tuple: The tuple to be perturbed
+            t: The tuple to be perturbed
 
         """
         for header in self.headers:
-            if self.global_ranges[header].lower is not None and self.global_ranges[header].upper is not None:
+            valid_lower = self.global_ranges[header].lower is not None
+            valid_upper = self.global_ranges[header].upper is not None
+
+            if valid_lower and valid_upper:
                 scale = max(self.global_ranges[header].difference(), 1) / self.phi
                 dist = np.round(np.random.laplace(scale=scale))
                 original_value = t.data[header]
@@ -222,7 +241,8 @@ class CASTLE():
         output_diversity = set()
 
         # Get the number of unique PIDs in the cluster
-        sc = self.split_l(c) if len(c.contents) >= 2 * self.k and len(c.diversity) >= self.l else [c]
+        splittable = len(c.contents) >= 2 * self.k and len(c.diversity) >= self.l
+        sc = self.split_l(c) if splittable else [c]
         for cluster in sc:
             for t in [c for c in cluster.contents]:
                 [generalised, original_tuple] = cluster.generalise(t)
@@ -247,11 +267,15 @@ class CASTLE():
 
             assert len(output_pids) >= self.k
             assert len(output_diversity) >= self.l
-            assert len(cluster) == 0
+            assert not cluster
 
             self.big_omega.append(cluster)
 
     def update_tau(self):
+        """Updates the local value of tau, depending on what state the
+        algorithm is currently in
+
+        """
         self.tau = math.inf
 
         # If we have elements in recent_losses, take an average
@@ -317,12 +341,10 @@ class CASTLE():
         if not setCok:
             if self.beta <= len(self.big_gamma):
                 return np.random.choice(tuple(setCmin))
-            else:
-                return None
-        else:
-            return np.random.choice(tuple(setCok))
 
-        return None
+            return None
+
+        return np.random.choice(tuple(setCok))
 
     def delay_constraint(self, t: Item):
         """Decides whether to suppress <t> or not
@@ -347,7 +369,8 @@ class CASTLE():
             if self.history:
                 self.tuple_history.append(original)
 
-            return self.callback(generalised)
+            self.callback(generalised)
+            return
 
         m = 0
 
@@ -356,7 +379,8 @@ class CASTLE():
                 m += 1
 
         if m > len(self.big_gamma) / 2:
-            return self.suppress_tuple(t)
+            self.suppress_tuple(t)
+            return
 
         total_tuples = len({t['pid'] for t in self.global_tuples})
         diversity_values = set()
@@ -365,7 +389,8 @@ class CASTLE():
             diversity_values.update(cluster.diversity)
 
         if total_tuples < self.k or len(diversity_values) < self.l:
-            return self.suppress_tuple(t)
+            self.suppress_tuple(t)
+            return
 
         mc = self.merge_clusters(t.parent)
 
@@ -420,14 +445,13 @@ class CASTLE():
                 heap.append(random_tuple)
 
             # Sort the heap by distance to our original tuple
-            distance_func = lambda t2: t.tuple_distance(t2)
-            heap.sort(key=distance_func)
+            heap.sort(key=t.tuple_distance)
 
             for node in heap:
                 cnew.insert(node)
 
                 # Scour the node from the Earth
-                containing = [key for key in buckets.keys() if node in buckets[key]]
+                containing = [key for key in buckets if node in buckets[key]]
 
                 for key in containing:
                     buckets[key].remove(node)
@@ -486,7 +510,8 @@ class CASTLE():
             for pid, bucket in buckets.items():
 
                 # Sort the bucket by the enlargement value of that cluster
-                sorted_bucket = sorted(bucket, key=lambda t: C.tuple_enlargement(t, self.global_ranges))
+                key = lambda t: C.tuple_enlargement(t, self.global_ranges)
+                sorted_bucket = sorted(bucket, key=key)
 
                 # Count the number of tuples we have
                 total_tuples = sum([len(b) for b in buckets.values()])
@@ -568,7 +593,8 @@ class CASTLE():
 
         while len(c) < self.k or len(c.diversity) < self.l:
             # Get the cluster with the lowest enlargement value
-            lowest_enlargement_cluster = min(gamma_c, key=lambda cl: c.cluster_enlargement(cl, self.global_ranges))
+            key = lambda cl: c.cluster_enlargement(cl, self.global_ranges)
+            lowest_enlargement_cluster = min(gamma_c, key=key)
             items = [t for t in lowest_enlargement_cluster.contents]
 
             for t in items:
