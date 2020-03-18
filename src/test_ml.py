@@ -56,7 +56,7 @@ def handler(value: pd.Series):
 	insert_time_list.append(counter)
 	sarray.append(value.data)
 
-def ml_test1():
+def ml_test():
 	print("test1")
 	args = app.parse_args()
 	global counter
@@ -87,118 +87,6 @@ def ml_test1():
 	print("Average Accuracy for CASTLE: {}".format(total/9))
 	os.remove("{}.csv".format(filename))
 
-def ml_test2():
-	args = app.parse_args()
-	global sarray
-	global counter
-	counter = 0
-	sarray = []
-	print("test2")
-	frame = pd.read_csv("diabetes.csv")
-	headers=["pregnancies","glucose","bloodPressure","skinThickness","insulin","bmi","diabetesPedigree","age"]
-	sensitive_attr = "outcome"
-
-	total = 0
-	for i in range(1, 10):
-		valid = validation(frame, frame[sensitive_attr], i)
-		total += valid
-	print("Average Accuracy for Regular Data: {}".format(total/9))
-
-	frame["pid"] = frame.index
-	params = Parameters(args)
-	stream = CASTLE(handler, headers, sensitive_attr, params)
-
-	for(_, row) in frame.iterrows():
-		counter+=1
-		stream.insert(row)
-
-	avg = mlu.average_group(sarray)
-	avg_features = avg[headers]
-	avg_norm = (avg_features - avg_features.mean()) / (avg_features.std())
-	total = 0
-	for i in range(1, 10):
-		valid = validation(avg_norm, avg[sensitive_attr], i)
-		total+=valid
-	print("Average Accuracy for CASTLE: {}".format(total/9))
-
-def ml_test3():
-	args = app.parse_args()
-	global sarray
-	global counter
-	counter = 0
-	sarray = []
-	print("test3")
-	frame = pd.read_csv("diabetes.csv")
-	headers=["pregnancies","glucose","bloodPressure","skinThickness","insulin","bmi","diabetesPedigree","age"]
-	sensitive_attr = "outcome"
-	layers = [Dense(256, activation='relu', use_bias='true', input_dim=8),
-			  Dense(64, activation='relu', use_bias='true', input_dim=256),
-			  Dense(256, activation='relu', use_bias='true', input_dim=64),
-			  Dense(1, activation='sigmoid', use_bias='true', input_dim=256),
-			]
-	frame[headers] = normalise(frame[headers])
-	train = frame[:int(len(frame)*0.75)]
-	test = frame[int(len(frame)*0.75):]
-
-	train_labels = train[sensitive_attr]
-	train = train[headers]
-	
-	test_labels = test[sensitive_attr]
-	test = test[headers]
-
-	model = Sequential(layers)
-	# model.summary()
-	model.compile(loss='binary_crossentropy', optimizer="adam" , metrics=['accuracy'])
-	model_data = model.fit(train, train_labels, epochs=1000, batch_size=64, verbose=0)
-
-	score = model.evaluate(test, test_labels, batch_size=64)
-	y_pred_classes = model.predict_classes(test)
-	training_epoch = model_data.epoch
-	training_loss = model_data.history['loss']
-	try:
-		training_accuracy = model_data.history['accuracy']
-	except: 
-		training_accuracy = model_data.history['acc']
-
-	print("Pre-CASTLE Test Loss: {}".format(score[0]))
-	print("Pre-CASTLE Test Accuracy: {}".format(score[1]))
-
-	frame["pid"] = frame.index
-	params = Parameters(args.k, args.delta, args.beta, args.mu, args.l)
-	stream = CASTLE(handler, headers, sensitive_attr, params)
-
-	for(_, row) in frame.iterrows():
-		counter+=1
-		stream.insert(row)
-
-	avg = mlu.average_group(sarray)
-	avg[headers] = normalise(avg[headers])
-	train = avg[:int(len(frame)*0.75)]
-	test = avg[int(len(frame)*0.75):]
-
-	train_labels = train[sensitive_attr]
-	train = train[headers]
-	
-	test_labels = test[sensitive_attr]
-	test = test[headers]
-
-	model = Sequential(layers)
-	# model.summary()
-	model.compile(loss='binary_crossentropy', optimizer="adam" , metrics=['accuracy'])
-	model_data = model.fit(train, train_labels, epochs=1000, batch_size=64, verbose=0)
-
-	score = model.evaluate(test, test_labels, batch_size=64)
-	y_pred_classes = model.predict_classes(test)
-	training_epoch = model_data.epoch
-	training_loss = model_data.history['loss']
-	try:
-		training_accuracy = model_data.history['accuracy']
-	except: 
-		training_accuracy = model_data.history['acc']
-
-	print("Post-CASTLE Test Loss: {}".format(score[0]))
-	print("Post-CASTLE Test Accuracy: {}".format(score[1]))
-
 
 def test_process():
 	frame = pd.read_csv(csv_gen.generate(filename,
@@ -217,7 +105,3 @@ def test_process():
 			assert frame_s[key] == processed[key]
 	os.remove("{}.csv".format(filename))
 
-
-# ml_test1()
-# ml_test2()
-# ml_test3()

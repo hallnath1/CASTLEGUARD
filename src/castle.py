@@ -28,7 +28,7 @@ class Parameters():
         self.beta = 5
         self.mu = 5
         self.l = 1
-        self.phi = 100
+        self.phi = 100 * np.log(2)
         self.dp = True
         self.big_beta = 1
 
@@ -178,12 +178,17 @@ class CASTLE():
 
         # If we now have too many tuples, try and output one
         if len(self.global_tuples) > self.delta:
-            # Get the next tuple to be output
+            self.cycle()
+
+        self.update_tau()
+
+    def cycle(self):
+        # Get the next tuple to be output
+        if len(self.global_tuples) > 0:
             t_prime = self.global_tuples[0]
             # print("Attempting to output: \n{}".format(t_prime))
             self.delay_constraint(t_prime)
 
-        self.update_tau()
 
     def fudge_tuple(self, t: Item):
         """ Fudges a tuple based on laplace distribution
