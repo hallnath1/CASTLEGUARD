@@ -76,6 +76,33 @@ simply call `CASTLE.insert(element)` to insert data. `CASTLE` will
 automatically call your callback function with any generalised tuples it
 produces.
 
+#### Generalisations
+
+Generalised data will be output with different headers to the original data.
+Firstly, the `pid` column will be removed, as this is what uniquely identifies
+the data subject. For each column that is to be `k`-anonymised, it will be
+replaced by 3 columns.
+
+These columns will have the name of the original, but prefixed with one of
+`[min, spc, max]`. The `min` and `max` columns are the ranges of the cluster
+being output, and the `spc` column is a sample value from the cluster, chosen
+randomly.
+
+The column chosen for `l`-diversity will be output as normal.
+
+For example, the following schema with `headers = ["TripDistance"]`,
+`sensitive_attribute = "FareAmount"`:
+
+| pid | TripDistance | FareAmount |
+|-----|--------------|------------|
+| ... |      ...     |     ...    |
+
+will be output to the callback function as:
+
+| minTripDistance | spcTripDistance | maxTripDistance | FareAmount |
+|-----------------|-----------------|-----------------|------------|
+|       ...       |       ...       |       ...       |     ...    |
+
 #### Available Parameters
 
 The available parameters are as follows:
