@@ -31,6 +31,7 @@ class Parameters():
         self.phi = 100 * np.log(2)
         self.dp = True
         self.big_beta = 1
+        self.history = False
 
         # If we have some arguments, try and use those instead
         if args:
@@ -42,6 +43,7 @@ class Parameters():
             self.phi = self.optional(args.phi, self.phi)
             self.dp = self.optional(args.disable_dp, self.dp)
             self.big_beta = self.optional(args.big_beta, self.big_beta)
+            self.history = self.optional(args.history, self.history)
             return
 
     def optional(self, value, default):
@@ -58,13 +60,11 @@ class Parameters():
 
     def __str__(self):
         """Returns a string representation of the object
-        Returns: TODO
+        Returns: A string representation of the internal values
 
         """
-        return "Parameters(k={}, delta={}, beta={}, mu={}, l={}, phi={}, dp={}, big_beta={})".format(
-            self.k, self.delta, self.beta, self.mu,
-            self.l, self.phi, self.dp, self.big_beta
-        )
+        params = ["{}={}".format(k, v) for k, v in self.__dict__.items()]
+        return "Parameters({})".format(", ".join(params))
 
 class CASTLE():
 
@@ -78,15 +78,15 @@ class CASTLE():
             callback: The function to call when a tuple is ejected
             headers: The columns that need to be anonymised according to the
             algorithm
-            k: The level of anonymity to provide
-            delta: The maximum number of active tuples at a time
-            beta: The maximum number of active clusters at a time
+            sensitive_attr: The column to use for l-diversity
+            params: The parameters to use for the algorithm
         """
+        # The callback function for output tuples
         self.callback: Callable[[pd.Series], None] = callback
 
-        self.history: List[Item] = []
-        self.deque: Deque = deque()
+        # The headers to use for k-anonymity
         self.headers: List[str] = headers
+        # The sensitive attribute for l-diversity
         self.sensitive_attr: str = sensitive_attr
 
         # Required number of tuples for a cluster to be complete
@@ -108,9 +108,16 @@ class CASTLE():
 
         if self.dp:
             # The 'scale' of tuple fudging
-            self.phi: int = params.phi
+            self.phi: float = params.phi
             # The percentage chance of ignoring a tuple
             self.big_beta: float = params.big_beta
+
+        # Whether we want to store the previously entered tuples
+        self.history: bool = params.history
+
+        # Optionally store all the tuples we have seen
+        if self.history:
+            self.tuple_history: List[Item] = []
 
         # Set of non-ks anonymised clusters
         self.big_gamma: List[Cluster] = []
@@ -220,7 +227,10 @@ class CASTLE():
             for t in [c for c in cluster.contents]:
                 [generalised, original_tuple] = cluster.generalise(t)
                 self.callback(generalised)
-                self.history.append(original_tuple)
+
+                if self.history:
+                    self.tuple_history.append(original_tuple)
+
                 output_pids.add(t['pid'])
                 output_diversity.add(t.sensitive_attr)
                 self.suppress_tuple(original_tuple)
@@ -333,7 +343,10 @@ class CASTLE():
             random_cluster = np.random.choice(KCset)
             generalised, original = random_cluster.generalise(t)
             self.suppress_tuple(original)
-            self.history.append(original)
+
+            if self.history:
+                self.tuple_history.append(original)
+
             return self.callback(generalised)
 
         m = 0
