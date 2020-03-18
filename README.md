@@ -110,7 +110,7 @@ The available parameters are as follows:
 |   `beta`  |            Maximum number of active clusters            |       5      |     `beta`> 0      |
 |    `mu`   |        Number of information loss values for tau        |       5      |      `mu`> 0       |
 |    `l`    | Minimum number of sensitive values in an output cluster |       1      |      `l`> 0        |
-|   `phi`   |                Scale of tuple pertubation               |      100     |      `phi`> 0      |
+|   `phi`   |                Scale of tuple pertubation               |  100 * ln(2) |      `phi`> 0      |
 | `big_beta`|           1 - probability of ignoring a tuple           |       1      | 0 <=`big_beta`<= 1 |
 |    `dp`   |        Whether or not to use differential privacy       |     True     |                    |
 
