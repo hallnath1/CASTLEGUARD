@@ -108,7 +108,7 @@ class CASTLE():
 
         if self.dp:
             # The 'scale' of tuple fudging
-            self.phi: int = params.phi
+            self.phi: float = params.phi
             # The percentage chance of ignoring a tuple
             self.big_beta: float = params.big_beta
 
