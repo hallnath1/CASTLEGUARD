@@ -80,16 +80,16 @@ produces.
 
 The available parameters are as follows:
 
-| Parameter |                         Meaning                         |    Default Value   |
-|:---------:|:-------------------------------------------------------:|:------------------:|
-|     k     |        Minimum number of IDs in an output cluster       |          5         |
-|   delta   |         Maximum number of tuples in CASTLEGUARD         |         10         |
-|    beta   |            Maximum number of active clusters            |          5         |
-|     mu    |        Number of information loss values for tau        |          5         |
-|     l     | Minimum number of sensitive values in an output cluster |          1         |
-|    phi    |                Scale of tuple pertubation               | 100 (must be >= 1) |
-|     dp    |        Whether or not to use differential privacy       |        True        |
-|  big_beta |           1 - probability of ignoring a tuple           |          1         |
+| Parameter |                         Meaning                         |    Default Value   |     Valid Range    |
+|:---------:|:-------------------------------------------------------:|:------------------:|:------------------:|
+|     k     |        Minimum number of IDs in an output cluster       |          5         |        k > 0       |
+|   delta   |         Maximum number of tuples in CASTLEGUARD         |         10         |        l > 0       |
+|    beta   |            Maximum number of active clusters            |          5         |      beta > 0      |
+|     mu    |        Number of information loss values for tau        |          5         |       mu > 0       |
+|     l     | Minimum number of sensitive values in an output cluster |          1         |                    |
+|    phi    |                Scale of tuple pertubation               | 100 (must be >= 1) |       phi > 0      |
+|     dp    |        Whether or not to use differential privacy       |        True        |                    |
+|  big_beta |           1 - probability of ignoring a tuple           |          1         | 0 <= big_beta <= 1 |
 
 All of these can be configured either in the `Parameters` object or on the
 command line.
