@@ -68,26 +68,34 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument(
         "--display",
-        action="store_true"
+        action="store_true",
+        help="Whether or not to display a graph after execution"
     )
 
     parser.add_argument(
         "--disable-dp",
-        action="store_false"
+        action="store_false",
+        help="Whether or not to disable differential privacy"
     )
 
     parser.add_argument(
         "--phi",
         nargs="?",
         type=int,
-        help="phi value used to perturb tuples for k anonymity"
+        help="The phi value used to perturb tuples for differential privacy"
     )
 
     parser.add_argument(
         "--big-beta",
         nargs="?",
         type=float,
-        help="drop input tuples with probability 1 - beta"
+        help="Drop input tuples with probability 1 - beta"
+    )
+
+    parser.add_argument(
+        "--history",
+        action="store_true",
+        help="Whether or not to store a history of all inserted tuples"
     )
 
     return parser
