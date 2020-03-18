@@ -28,7 +28,7 @@ class Parameters():
         self.beta = 5
         self.mu = 5
         self.l = 1
-        self.phi = 100
+        self.phi = 100 * np.log(2)
         self.dp = True
         self.big_beta = 1
 
