@@ -29,10 +29,6 @@ anonymisation algorithm.
 > providing effective utility to data processors in the context of machine
 > learning.
 
-### Sample Output
-
-![alt text](https://i.imgur.com/Z1dl5jQ.png "An example of data clustering")
-
 ## Usage
 
 ### Command Line Simulations
