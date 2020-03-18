@@ -1,9 +1,18 @@
+"""Contains the Item class for manipulating tuples in CASTLE, typically meaning
+a single row from a dataset."""
+
 import math
-import pandas as pd
 
 from typing import Any, List
 
+import pandas as pd
+
 class Item:
+
+    """A singular tuple within the CASTLE algorithm. Provides operations
+    between tuples such as the distance, and allows tracking tuples more
+    easily."""
+
     def __init__(self, data: pd.Series, headers: List[str], sensitive_attr: str):
         """Initialises an Item object
 
@@ -14,21 +23,19 @@ class Item:
         """
         self.data: pd.Series = data
         self.headers: List[str] = headers
-        self.sensitive_attr: str = data[sensitive_attr] if sensitive_attr else None
+        self.sensitive_attr: float = data[sensitive_attr] if sensitive_attr else None
         self.parent = None
 
-    def tuple_distance(self, t) -> float:
+    def tuple_distance(self, other) -> float:
         """Calculates the distance between the two tuples
 
         Args:
-            t: The tuple to calculate the distance to
+            other: The tuple to calculate the distance to
 
         Returns: The distance to the tuple
 
         """
-        s = self.data[self.headers]
-        t = t.data[self.headers]
-        error = s.sub(t).abs()
+        error = self.data[self.headers].sub(other.data[self.headers]).abs()
         mean_squared_error = error.pow(2).mean(axis=0)
         return math.sqrt(mean_squared_error)
 
@@ -60,5 +67,13 @@ class Item:
         """
         return self.data.to_string()
 
-    def __eq__(self, i):
-        return self.headers == i.headers and self.data.equals(i.data)
+    def __eq__(self, other) -> bool:
+        """Checks whether two Items are equivalent to each other.
+
+        Args:
+            other: The Item to compare to
+
+        Returns: Whether or not the items are equal
+
+        """
+        return self.headers == other.headers and self.data.equals(other.data)
