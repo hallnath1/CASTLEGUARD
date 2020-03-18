@@ -7,28 +7,27 @@ with GUARanteed Differential privacy) is an extension to the CASTLE data stream
 anonymisation algorithm.
 
 > Data streams are a common tool used by data controllers to outsource data
-> processing of time series data to external data processors \cite{qiu_2008}.
-> Data protection legislation now enforces that data controllers are responsible
-> for providing a guarantee of privacy for user data contained within published
-> data streams \cite{eudgpr_2017}. CASTLE \cite{cao_2011} is a well-known method
-> of anonymising data streams with a guarantee of $k$-anonymity, however,
-> $k$-anonymity has been shown to be a weak privacy guarantee with numerous
-> vulnerabilities in practice. As such, users may desire a stronger privacy
-> guarantee. We propose \textit{Continuously Anonymising STreaming data via
-> adaptive cLustEring with GUARanteed Differential privacy} (CASTLEGUARD), a data
-> stream anonymisation algorithm which provides a reliable guarantee of
-> $l$-diversity and differential privacy based on additional parameters $l$,
-> $\beta$ and $\phi$. We achieve differential privacy for data streams by
-> sampling entries from an input data stream $S$ with probability $\beta$ and by
-> performing "safe" $k$-anonymisation, meaning that no true quasi-identifiable
-> attribute value can be inferred from the extreme values of a generalisation,
-> using additive noise taken from a Laplace distribution with $\mu = 0$, $b =
-> \frac{R}{\phi}$ where $R$ is the range of an attribute. We show that, with
-> "safe" $k$-anonymisation and $\beta$-sampling, CASTLEGUARD satisfies
-> differentially private $k$-anonymity \cite{li_2011_dp}. Our experimental
-> analysis of CASTLEGUARD demonstrates that it effectively protects the
-> individual privacy of users whilst still providing effective utility to data
-> processors in the context of machine learning.
+> processing of time series data to external data processors.  Data protection
+> legislation now enforces that data controllers are responsible for providing
+> a guarantee of privacy for user data contained within published data streams.
+> CASTLE (Cao et al.) is a well-known method of anonymising data streams with a
+> guarantee of k-anonymity, however, k-anonymity has been shown to be a weak
+> privacy guarantee with numerous vulnerabilities in practice. As such, users
+> may desire a stronger privacy guarantee. We propose Continuously Anonymising
+> STreaming data via adaptive cLustEring with GUARanteed Differential privacy
+> (CASTLEGUARD), a data stream anonymisation algorithm which provides a
+> reliable guarantee of l-diversity and differential privacy based on
+> additional parameters l, β and Φ. We achieve differential privacy for data
+> streams by sampling entries from an input data stream S with probability β
+> and by performing "safe" k-anonymisation, meaning that no true
+> quasi-identifiable attribute value can be inferred from the extreme values of
+> a generalisation, using additive noise taken from a Laplace distribution with
+> μ = 0, b = (R/Φ) where R is the range of an attribute. We show that, with
+> "safe" k-anonymisation and β-sampling, CASTLEGUARD satisfies differentially
+> private k-anonymity. Our experimental analysis of CASTLEGUARD demonstrates
+> that it effectively protects the individual privacy of users whilst still
+> providing effective utility to data processors in the context of machine
+> learning.
 
 ### Sample Output
 
