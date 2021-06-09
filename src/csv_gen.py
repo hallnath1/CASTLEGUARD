@@ -13,11 +13,23 @@
 - each row should have a pid
 """
 
-from faker import Faker
 import time
 import datetime
 import random
 import re
+
+NAMES = [
+    "Gladys Conway",
+    "Kristen Sanford",
+    "Leyton Lutz",
+    "Ehsan Schmitt",
+    "Kacy Clarkson",
+    "Carmen Kemp",
+    "Bill Garza",
+    "Dougie Singh",
+    "Eiliyah Phelps",
+    "Zofia Compton"
+]
 
 def create_file(name=None):
     """
@@ -63,7 +75,6 @@ def generate(name=None,
     if len(headers) != len(datatypes):
         print("Need a datatype for each header")
         return
-    fake = Faker()
     f, filename = create_file(name)
     headers.insert(0,"pid")
     f.write(','.join(headers)+"\n")
@@ -72,7 +83,7 @@ def generate(name=None,
         row = [str(pid)]
         for i in range(0, len(datatypes)):
             if datatypes[i] == "name":
-                row.append(fake.name())
+                row.append(random.choice(NAMES))
             elif re.search("(int|float)", datatypes[i]):
                 row.append(str(gen_rand_number(datatypes[i])))
             else:
@@ -104,7 +115,6 @@ def generate_output_data(name=None,
     if len(headers) != len(datatypes):
         print("Need a datatype for each header")
         return
-    fake = Faker()
     f, filename = create_file(name)
     temp = []
     temp.append("pid")
@@ -123,7 +133,7 @@ def generate_output_data(name=None,
         row = [str(pid)]
         for i in range(0, len(headers)):
             if datatypes[i] == "name":
-                row.append(fake.name())
+                row.append(random.choice(NAMES))
             elif re.search("(int|float)", datatypes[i]):
                 max = gen_rand_number(datatypes[i])
                 if headers[i] in generalise:
