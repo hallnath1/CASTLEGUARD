@@ -1,6 +1,6 @@
 matplotlib==3.4.2
 numpy==1.22.0
 pandas==1.2.4
-scikit-learn==0.24.2
+scikit-learn==1.0.1
 Keras==2.4.3
 pytest==6.2.4
